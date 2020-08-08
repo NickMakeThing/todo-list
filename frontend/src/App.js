@@ -8,13 +8,15 @@ class App extends Component {
   constructor(props){
     super(props)
     this.state = {
-      views : [],
+      views : {},
       colour : '#079d41',
       activeView : 'Lists',
       loggedIn : false,
-      user : {}
+      user : {},
+      func : null
     }
   }
+
   login = (username,password) => {
     var xhr = new XMLHttpRequest()
     xhr.open('POST','http://localhost:8000/login/')
@@ -31,61 +33,76 @@ class App extends Component {
     }
     xhr.send(JSON.stringify({username: username, password: password}))
   }
-
-  changeView = (className, colourCode) => {
+  passFunction = func => {
+    this.setState({
+      func : func
+    })
+  }
+  changeView = (name, colourCode) => {
     //this worked for some reason -> this.state.activeView = e.target.id
     this.setState({
-      activeView : className,
+      activeView : name,
       colour : colourCode
     })
   }
 
-  editViewColour = (className, colourCode) => {
-    let tabs = []
-    for(let i of this.state.views){
-      if(i.className == className){
-        tabs.push({className : className, colourCode : colourCode, listId : i.listId})
-      } else {
-        tabs.push(i)
+  editViewColour = (nameArr, colourCode) => {
+    var views = JSON.parse(JSON.stringify(this.state.views))
+    var colour = this.state.colour
+    if (this.state.activeView == nameArr){
+      colour = colourCode
+    }
+    for (let i of nameArr){
+      if (views[i]){
+        views[i].colourCode = colourCode
       }
     }
     this.setState({
-      views : tabs
+      views : views,
+      colour : colour
     })
   }
 
   openNavTab = (name, colourCode, listId) => {
-    //prevents duplicates
-    console.log(colourCode)
-    if (this.state.views.some(view => view.className == name)){
+    if (this.state.views[name]){
       return
     }
+    var views = JSON.parse(JSON.stringify(this.state.views))
+    views[name]={colourCode: colourCode, listId : listId}
     this.setState({
-        views : [ ...this.state.views, {className: name, colourCode: colourCode, listId : listId}]
+        views : views
     })
   }
 
   closeNavTab = e => {
     e.stopPropagation()
-    var tabs=[]
-    var className = e.target.parentNode.className
-    for (let i of this.state.views){
-      if (i.className != className){
-        tabs.push(i)
-      }
-    }
+    var views = JSON.parse(JSON.stringify(this.state.views))
+    var name = e.target.parentNode.className
+    delete views[name]
     this.setState ({
-      views: tabs
+      views: views
     },() =>{
       if(!this.state.views.length){
         this.changeView('Lists','#079d41')
       } else {      
-        let view = this.state.views.slice(-1)[0]
-        this.changeView(view.className,view.colourCode)
+        let viewKey = Object.keys(this.state.views).slice(-1)[0]
+        this.changeView(viewKey,this.state.views[viewKey].colourCode)
         //this is annoying if you have another tab open that you are not closing. come back to this.
       } 
     })
   }
+  update = (update,callback,path) => {
+    var xhr = new XMLHttpRequest()
+    xhr.open('PATCH','http://localhost:8000/api/'+path+'/')
+    xhr.setRequestHeader('content-type','application/json')
+    xhr.setRequestHeader('X-CSRFTOKEN',document.cookie.slice(10))
+    xhr.onload = () => { console.log(xhr.status)
+        if (xhr.status == 206){
+            callback()
+            }
+        }
+    xhr.send(JSON.stringify(update))
+}
 
   componentWillMount(){
     if (!this.state.loggedIn && localStorage.getItem('loggedIn') == "true"){
@@ -98,12 +115,13 @@ class App extends Component {
     document.body.style.backgroundColor = this.state.colour
     if (this.state.loggedIn){
       var views=[]
-      for (let i of this.state.views){
+      for (let i in this.state.views){
         views.push(
-        <View 
-        key={i.className}
-        listId={i.listId}
-        className={i.className} 
+        <View className={i} 
+        key={i}
+        listId={this.state.views[i].listId}
+        update={this.update}
+        updateList={this.state.func} 
         activeView={this.state.activeView}/>
         )
       }
@@ -114,9 +132,11 @@ class App extends Component {
     
         <div id='views'>
           <ListView className='Lists'
-          openNavTab={this.openNavTab} 
-          editViewColour={this.editViewColour} 
-          activeView={this.state.activeView}/>
+            update={this.update}
+            openNavTab={this.openNavTab} 
+            editViewColour={this.editViewColour} 
+            passFunction={this.passFunction}
+            activeView={this.state.activeView}/>
           {views}
         </div>]
     } else {

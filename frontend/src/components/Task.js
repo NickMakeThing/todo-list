@@ -61,6 +61,7 @@ export default class Task extends Component {
     }
     
     render() {
+        var innerText = this.props.completed ? <s>{this.props.name}</s> : this.props.name
         var check = this.props.selected ? '✔' : ''
         if (this.props.dragging && this.props.dragging.name == this.props.name) {
             var styling = Object.assign({
@@ -101,8 +102,10 @@ export default class Task extends Component {
         return( 
             <>
             <div style={styling}
+                onClick={e=>e.stopPropagation()}
+                onMouseUp={this.props.mouseUpFix}
                 onMouseOver={e =>this.props.dragOver(e,this.props.priority)}
-                onMouseDown={() => this.props.dragStart(this.props.priority,this.props.name)}
+                onMouseDown={e =>this.props.dragStart(e,this.props.priority,this.props.name)}
             >
                 <CheckBox
                     position={'absolute'}
@@ -110,7 +113,7 @@ export default class Task extends Component {
                     left={'15px'} 
                     priority={this.props.priority} 
                     preventPropogation={this.preventPropogation}
-                    selectTask={this.props.selectTask}
+                    select={this.props.selectTask}
                     check={check}/>
                 <span 
                     style={{ 
@@ -121,17 +124,17 @@ export default class Task extends Component {
                 }}>
                     <TaskButton
                         buttonFunctions={this.buttonFunctions}
-                        onClick={this.descriptionClick}
+                        mouseUpFix={this.props.mouseUpFix}
+                        onClick={e=>this.props.openDescription(e,this.props.priority)}
                         symbol='?'
                     />
                     </span>
                 <span 
                     style={{lineHeight : '50px'}}>
-                    {this.props.name}
+                    {innerText}
                 </span> 
 
             </div> 
-
             {ghostDiv}
             </>
         )

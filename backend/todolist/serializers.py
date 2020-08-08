@@ -5,12 +5,12 @@ from django.contrib.auth.models import User
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ('id','listId','taskName','priority')
+        fields = ('id','listId','taskName','priority','completed','colour','description')
 
 class ListSerializer(serializers.ModelSerializer):
     class Meta:
         model = List
-        fields = ('id','listName','userid')
+        fields = ('id','listName','userid','colour')
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

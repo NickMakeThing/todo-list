@@ -10,17 +10,14 @@ from .serializers import TaskSerializer, ListSerializer, UserSerializer
 class TasksView(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
 
+    #can just dqueryset.update(field1=x,field2=y,field3=..) but will this work for patch/partial update?
+    #also can use bulkupdate https://docs.djangoproject.com/en/3.0/ref/models/querysets/#bulk-update
     def patch(self, request, *args, **kwargs): #"PATCH /api/tasks/1/ HTTP/1.1" 405 42 when using partial_update without defining patch
         print('\n\n',request.data,'\n\n')
-        ids = []
-        for i in request.data:
-            ids.append(i['id'])
-        stuff=self.get_queryset().filter(id__in=list(ids))
-        serializer = self.get_serializer(instance=stuff, data=request.data, many=True, partial=True)
-        serializer.is_valid(raise_exception=True)
-        print(serializer, '\n\n')
-        self.perform_update(serializer)
-        return Response(serializer.data)
+        tasks = self.get_queryset().filter(id__in=list(request.data['idArr']))
+        del request.data['idArr']
+        tasks.update(**request.data)
+        return Response(status=206)
 
     """def partial_update(self, request, *args, **kwargs): #"PATCH /api/tasks/1/ HTTP/1.1" 405 42
         print('\n\n',request.data,'\n\n')
@@ -46,6 +43,18 @@ class TasksView(viewsets.ModelViewSet):
 class ListsView(viewsets.ModelViewSet):
     queryset = List.objects.all()
     serializer_class = ListSerializer
+    def patch(self, request, *args, **kwargs): 
+        print('\n\n',request.data,'\n\n')
+        tasks = self.get_queryset().filter(id__in=list(request.data['idArr']))
+        del request.data['idArr']
+        tasks.update(**request.data)
+        return Response(status=206)
+        
+    def delete(self, request, *args, **kwargs):
+        stuff=self.get_queryset().filter(id__in=list(request.data))
+        print('\n\n',stuff,'\n\n')
+        self.perform_destroy(stuff) 
+        return Response(status=204)
  
 class RegistrationView(CreateAPIView):
     serializer_class = UserSerializer

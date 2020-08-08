@@ -15,11 +15,11 @@ export default class NavBar extends Component {
 
     render() {
         var tabs=[]
-        for (let i of this.props.views) {
+        for (let i in this.props.views) {
             tabs.push(
             <NavTab closeNavTab={this.props.closeNavTab} 
-            className={i.className} 
-            colourCode={i.colourCode}
+            className={i} 
+            colourCode={this.props.views[i].colourCode}
             changeView={this.props.changeView}
             activeView={this.props.activeView}/>
             ) 

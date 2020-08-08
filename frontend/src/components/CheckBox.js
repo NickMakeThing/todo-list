@@ -16,7 +16,8 @@ export default class CheckBox extends Component {
             e.target.style.backgroundColor='rgba(240,240,240,1)'
         }}
         onMouseDown={this.props.preventPropogation}
-        onClick={()=>this.props.selectTask(this.props.priority)}
+        onMouseUp={this.props.mouseUpFix}
+        onClick={e=>this.props.select(e,this.props.priority)}
         style={{
             display : 'inline-block',
             //tick needs to be moved to the left slightly
