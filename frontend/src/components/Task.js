@@ -5,8 +5,11 @@ import CheckBox from './CheckBox'
 export default class Task extends Component {
     constructor(props) {
         super(props)
+        this.textSpan = React.createRef()
         this.state = {
             taskColour : this.props.colour,
+            lineHeight : '50px',
+            wordBreak : ''
         }
     }
 
@@ -57,10 +60,29 @@ export default class Task extends Component {
         width : '250px',
         height : '50px',
         textAlign : 'center',
-        //this.state is undefined when putting this.state.taskcolour here
     }
-    
+    textStyle = {
+        position: 'absolute', 
+        left: '30px', 
+        width:'200px',
+        fontSize:'90%' 
+    }
+    componentDidMount(){
+        if(this.textSpan.current.scrollWidth>200){
+            this.setState({
+                lineHeight:'25px',
+                wordBreak:'break-all'
+            })
+        }
+    }
     render() {
+        var textStyle = Object.assign({
+            lineHeight : this.state.lineHeight, 
+            wordBreak : this.state.wordBreak
+        },{...this.textStyle})
+        if (!this.state.wordBreak){
+            textStyle['whiteSpace'] = 'nowrap'
+        }
         var innerText = this.props.completed ? <s>{this.props.name}</s> : this.props.name
         var check = this.props.selected ? '✔' : ''
         if (this.props.dragging && this.props.dragging.name == this.props.name) {
@@ -92,13 +114,6 @@ export default class Task extends Component {
             
             var ghostDiv = null
         }    
-        //in options when reordering tasks:
-        //name value changes to the task moved to dragged tasks old position
-        //also task moved to that position is changed to the dragged's task colour 
-        //dragged task name follows to the new position, but colour changes to the 
-        //colour of the task that was in that position before
-        //i know that putting these values in tasks state as a single object will solve it
-        //but before i do that i want to know more about why/how it happens
         return( 
             <>
             <div style={styling}
@@ -129,10 +144,10 @@ export default class Task extends Component {
                         symbol='?'
                     />
                     </span>
-                <span 
-                    style={{lineHeight : '50px'}}>
+                <div ref={this.textSpan}
+                    style={textStyle}>
                     {innerText}
-                </span> 
+                </div> 
 
             </div> 
             {ghostDiv}

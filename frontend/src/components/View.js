@@ -6,6 +6,7 @@ import ViewButton_s from './ViewButton(sidebar)'
 export default class View extends Component {
     constructor(props){
         super(props)
+        this.textArea=React.createRef()
         this.state = {
             tasks : {},
             tasksLoaded : false,
@@ -15,11 +16,10 @@ export default class View extends Component {
             input : '',
             checkBox : 0, 
             buttonUI : {rename: false, colour: {palette : false, button : false}, check: false, delete : false, description : true},
-            description : {showing : false, task : 1, content : 'description', modified : false}
+            description : {showing : false, task : 1, content : 'description', modified : false},
+            priorityUpdateInfo : { draggedFrom : 0, draggedTo : 0}
         }
     }
-
-
     taskComplete = () => {
         var tasks =  JSON.parse(JSON.stringify(this.state.tasks))
         var idArr = []
@@ -87,25 +87,15 @@ export default class View extends Component {
             input : e.target.value
         })
     }
-    selectTask = (e,priority) => {
-        e.stopPropagation()
-        var tasks =     JSON.parse(JSON.stringify(this.state.tasks))
-        var buttonUI =  JSON.parse(JSON.stringify(this.state.buttonUI))
-        if (tasks[priority].selected){
-            var count = this.state.checkBox-1
-        } else {
-            var count = this.state.checkBox+1
-        }
+    selectTaskCheck = (tasks,buttonUI,count) => {
         if (count>1){
             var removeTag = true
         }
         if (count>=1){
             var del = true
-            var colour = true 
             var check = true
         }
         var rename = removeTag ? false : this.state.buttonUI.rename
-        tasks[priority].selected = !tasks[priority].selected
         var firstCheck = true
         for (let i in tasks){
             if (tasks[i].selected){
@@ -130,10 +120,23 @@ export default class View extends Component {
             delete : del,
             description : this.state.buttonUI.description
         }
+        return {tasks : tasks, count : count, buttonUI : buttonUI}
+    }
+    selectTask = (e,priority) => {
+        e.stopPropagation()
+        var tasks =     JSON.parse(JSON.stringify(this.state.tasks))
+        var buttonUI =  JSON.parse(JSON.stringify(this.state.buttonUI))
+        if (tasks[priority].selected){
+            var count = this.state.checkBox-1
+        } else {
+            var count = this.state.checkBox+1
+        }
+        tasks[priority].selected = !tasks[priority].selected
+        var state = this.selectTaskCheck(tasks,buttonUI,count)
         this.setState({
-            tasks : tasks,
-            checkBox : count,
-            buttonUI : buttonUI
+            tasks : state.tasks,
+            checkBox : state.count,
+            buttonUI : state.buttonUI
         })
     }
     setMouse = e => {
@@ -145,6 +148,7 @@ export default class View extends Component {
                     var draggedOver = this.state.draggedOver.priority
                     var dragging = this.state.dragging.priority
                     var tasks= JSON.parse(JSON.stringify(this.state.tasks))
+    
                     if (this.state.mouse.y < this.state.draggedOver.pos && dragging>draggedOver){
                         delete tasks[dragging]
                         tasks[draggedOver]=this.state.tasks[dragging]
@@ -153,7 +157,8 @@ export default class View extends Component {
                         }
                         this.setState({
                             tasks : tasks,
-                            dragging : {priority : draggedOver, name : this.state.dragging.name}
+                            dragging : {priority : draggedOver, name : this.state.dragging.name},
+                            priorityUpdateInfo : {draggedFrom : this.state.priorityUpdateInfo.draggedFrom, draggedTo : draggedOver}
                         })
                     } else if (this.state.mouse.y > this.state.draggedOver.pos && dragging<draggedOver){ 
                         delete tasks[dragging]
@@ -163,7 +168,8 @@ export default class View extends Component {
                         }
                         this.setState({
                             tasks : tasks,
-                            dragging : {priority : draggedOver, name : this.state.dragging.name}
+                            dragging : {priority : draggedOver, name : this.state.dragging.name},
+                            priorityUpdateInfo : {draggedFrom : this.state.priorityUpdateInfo.draggedFrom, draggedTo : draggedOver}
                         })
                     }   
                 }
@@ -173,7 +179,8 @@ export default class View extends Component {
     dragStart = (e,priority,name) => {
         this.setState ({
             dragging : {priority,name},
-            mouse : {x : e.clientX, y : e.clientY}
+            mouse : {x : e.clientX, y : e.clientY},
+            priorityUpdateInfo : {draggedFrom : priority, draggedTo : priority}
         })
     }
     mouseUpFix = e =>{
@@ -186,14 +193,31 @@ export default class View extends Component {
             }) 
         }
     }
-    drop = () => {
+    taskOrderUpdate = () => {
+        var fromTo = JSON.parse(JSON.stringify(this.state.priorityUpdateInfo))
+        if (fromTo.draggedFrom==fromTo.draggedTo) {
+            return
+        }
+        var higher = Math.max(fromTo.draggedFrom,fromTo.draggedTo)
+        var lower = Math.min(fromTo.draggedFrom,fromTo.draggedTo)
+        var update = {} 
+        var idArr = []
+        for (let i=lower;i<=higher;i++){
+            update[this.state.tasks[i].id]=i
+            idArr.push(this.state.tasks[i].id)
+        }
+        this.props.update({idArr:idArr,priority:update},()=>null,'tasks/'+this.props.listId)
+    }
+    drop = e => {
         if(!this.state.dragging){
             this.closeOptions()
         } else {
+            this.taskOrderUpdate()
             this.setState({
                 dragging : null,
                 draggedOver : null,
-                mouse : 0
+                mouse : 0,
+                priorityUpdateInfo : { draggedFrom : 0, draggedTo : 0}
             })  
         }
     }
@@ -206,7 +230,25 @@ export default class View extends Component {
             })
         }
     }    
-    deleteTask = ()=> {
+    updatePriority = tasks => {
+        var count = 0
+        var priority = {} 
+        var idArr = []
+        for(let i in tasks){
+            if (i!=count){
+                tasks[count]=tasks[i]
+                delete tasks[i]
+                idArr.push(tasks[count].id)
+                priority[tasks[count].id]=count
+            }
+            count++
+        }
+        /*if(idArr.length){
+            this.props.update({idArr:idArr,priority:priority},()=>null,'tasks/'+this.props.listId)
+        }*/
+        return { tasks : tasks, idArr : idArr, priority: priority}
+    }
+    taskDelete = ()=> {
         var taskIds = []
         var taskKeys = []
         var tasks =  JSON.parse(JSON.stringify(this.state.tasks))
@@ -217,26 +259,32 @@ export default class View extends Component {
                 taskKeys.push(i)
             }
         }
+        var buttonUI =  JSON.parse(JSON.stringify(this.state.buttonUI))
+        var count = this.state.checkBox-taskKeys.length
+        for (let i of taskKeys){
+            if(i == this.state.description.task.priority){
+                description = {showing : false, task : 1, content : 'description', modified : false}
+            }
+            delete tasks[i]
+        }
+        var updated = this.updatePriority(tasks)
+        tasks = updated.tasks
+        var state = this.selectTaskCheck(tasks,buttonUI,count)
         var xhr = new XMLHttpRequest()
         xhr.open('DELETE','http://localhost:8000/api/tasks/'+this.props.listId+'/')
         xhr.setRequestHeader('content-type','application/json')
         xhr.setRequestHeader('X-CSRFTOKEN',document.cookie.slice(10))
         xhr.onload = () => {
-            console.log(xhr.status)
             if (xhr.status == 204){
-                    for (let i of taskKeys){
-                        if(i == this.state.description.task.priority){
-                            description = {showing : false, task : 1, content : 'description', modified : false}
-                        }
-                        delete tasks[i]
-                    }
-                    this.setState({
-                        tasks: tasks,
-                        description: description
-                    })
-                } 
-            }
-        xhr.send(JSON.stringify(taskIds))
+                this.setState({
+                    tasks: state.tasks,
+                    checkBox: state.count,
+                    buttonUI: state.buttonUI,
+                    description: description
+                })
+            } 
+        }
+        xhr.send(JSON.stringify({delete:taskIds, idArr:updated.idArr, priority:updated.priority}))
     } 
     taskCreate = () => { //remember to takeout cors middleware
         for (let i of Object.values(this.state.tasks)) {
@@ -257,7 +305,7 @@ export default class View extends Component {
         }
         var priority=0
         if (this.state.tasks['0']){
-            priority=parseInt(Object.keys(this.state.tasks).slice(-1)[0])+1
+            priority=parseInt(Object.keys(this.state.tasks).slice(-1)[0])+1//pop
         }
         xhr.send(JSON.stringify({listId : this.props.listId, taskName : this.state.input, priority : priority}))
     }
@@ -270,34 +318,6 @@ export default class View extends Component {
                 buttonUI : buttonUI,
                 description : description
             })
-    }
-    componentDidUpdate(){
-        if (this.props.activeView == this.props.className && !this.state.tasksLoaded) {
-            let xhr = new XMLHttpRequest()
-            xhr.open('GET','http://localhost:8000/api/tasks/'+this.props.listId)
-            xhr.setRequestHeader('content-type','application/json')
-            xhr.responseType = 'json'
-            xhr.onload = () => {
-                if (xhr.status == 200) {
-                    let tasks = {}
-                    xhr.response.map(task => {
-                        tasks[task.priority]={
-                            id : task.id, 
-                            colour : task.colour, 
-                            description : task.description, 
-                            selected : false, 
-                            name : task.taskName,
-                            completed : task.completed
-                        }
-                    })
-                    this.setState({
-                        tasks : tasks,
-                        tasksLoaded : true,
-                    })
-                }
-            }
-            xhr.send()
-        }
     }
     openDescription = (e,priority) =>{
         if(this.state.description.showing && priority == this.state.description.task.priority){
@@ -334,6 +354,7 @@ export default class View extends Component {
         })
     }
     editDescription = e =>{
+        this.textArea.current.focus()
         var buttonUI = JSON.parse(JSON.stringify(this.state.buttonUI))
         buttonUI.description = !buttonUI.description
         this.setState({
@@ -376,6 +397,34 @@ export default class View extends Component {
             description : description
         })
     }
+    componentDidUpdate(){
+        if (this.props.activeView == this.props.className && !this.state.tasksLoaded) {
+            let xhr = new XMLHttpRequest()
+            xhr.open('GET','http://localhost:8000/api/tasks/'+this.props.listId)
+            xhr.setRequestHeader('content-type','application/json')
+            xhr.responseType = 'json'
+            xhr.onload = () => {
+                if (xhr.status == 200) {
+                    let tasks = {}
+                    xhr.response.map(task => {
+                        tasks[task.priority]={
+                            id : task.id, 
+                            colour : task.colour, 
+                            description : task.description, 
+                            selected : false, 
+                            name : task.taskName,
+                            completed : task.completed
+                        }
+                    })
+                    this.setState({
+                        tasks : tasks,
+                        tasksLoaded : true,
+                    })
+                }
+            }
+            xhr.send()
+        }
+    }
     inputStyle = {
         width:'235px',
         fontSize: '14px', 
@@ -393,14 +442,19 @@ export default class View extends Component {
         pointerEvents : 'none', 
         marginBottom:'10px'
     }
-    descriptionStyle = {
+    descriptionContainer = {
         position: 'absolute',
         left: '400px',
-        top:'140px',
+        top:'140px', 
+        height:'100%'
+    }
+    descriptionStyle = {
+        position:'sticky',
+        top:0,
+        left:0,
         maxWidth:'300px',
         backgroundColor: 'rgba(255,255,255,0.5)',
         overflow:'hidden',
-        //wordWrap:'break-word'
     }
     textAreaStyle = {
         color : 'rgba(0,0,0,1)',
@@ -416,21 +470,24 @@ export default class View extends Component {
         cursor:'pointer', 
         opacity:0.3
     }
-    render(){        
+    render(){ 
         var disabled = true
         if (this.state.checkBox!=1) {
                 disabled = false
         }
-        var styling = {margin : '50px', width: '100%', height:'90%'}
+        var styling = {margin : '50px', width: '90%', height:'90%'}
+        var ref = 'none'
         if (this.props.activeView != this.props.className) {
             styling.display = 'none'
-        } 
+        } else {
+            ref=this.props.reference
+        }
         var show = 'none'
         if (this.state.description.showing){
             show = 'block'
         }
         if (this.state.description.task.priority){
-            var taskLabel = { backgroundColor : this.state.tasks[this.state.description.task.priority].colour}
+            var taskLabel = { backgroundColor : this.state.description.task.colour}
         }
         var modified = this.state.description.modified ? <span style={{color:'red'}}>(modified)</span> : null
         var descriptionStyle = Object.assign({display : show},{...this.descriptionStyle})
@@ -449,7 +506,6 @@ export default class View extends Component {
                         dragOver={this.dragOver}
                         dragging={this.state.dragging}
                         mouse={this.state.mouse}
-                        deleteTask={this.deleteTask}
                         dragStart={this.dragStart}
                         name={this.state.tasks[i].name}
                         id={this.state.tasks[i].id}
@@ -459,8 +515,9 @@ export default class View extends Component {
             ) 
         }
         return (
-            <div style={styling}
+            <div style={styling} ref={ref}
                 onMouseMove={this.setMouse} 
+                onClick={e=>e.stopPropagation()}
                 onMouseUp={this.drop} 
                 className={this.props.className}>
                 <span style={{position : 'absolute'}}> 
@@ -492,31 +549,35 @@ export default class View extends Component {
                         mouseUpFix={this.mouseUpFix}
                         disabled={this.state.buttonUI.check}/> 
                     <ViewButton_s img={'delete.png'} l='7px' 
-                        func={this.deleteTask} 
+                        func={this.taskDelete} 
                         mouseUpFix={this.mouseUpFix}
                         disabled={this.state.buttonUI.delete}/> {/* need better trash icon */}
                 </span>
                     {tasks}
-                <div style={descriptionStyle} onClick={e=>e.stopPropagation()} onMouseUp={e=>e.stopPropagation()}>
-                    <span style={taskLabel}>
-                        {this.state.description.task.name}
-                        <span style={this.closeDescriptionStyle} 
-                            onClick={this.closeDescription}>
-                            x
+
+                <span style={this.descriptionContainer}>    
+                    <div style={descriptionStyle} onClick={e=>e.stopPropagation()} onMouseUp={e=>e.stopPropagation()}>
+                        <span style={taskLabel}>
+                            {this.state.description.task.name}
+                            <span style={this.closeDescriptionStyle} 
+                                onClick={this.closeDescription}>
+                                x
+                            </span>
                         </span>
-                    </span>
-                    {modified}
-                    <textarea value={this.state.description.content} 
-                        style={this.textAreaStyle} 
-                        readOnly={this.state.buttonUI.description}
-                        onChange={this.changeDescription}/>           
-                    <ViewButton_s symbol={'✍'} 
-                        func={this.editDescription} 
-                        save={this.saveNewDescription}
-                        style={{float:'right', margin:'-10px'}}
-                        disabled={'true'} 
-                        descriptionUI={!this.state.buttonUI.description}/>
-                </div>
+                        {modified}
+                        <textarea value={this.state.description.content} 
+                            ref={this.textArea}
+                            style={this.textAreaStyle} 
+                            readOnly={this.state.buttonUI.description}
+                            onChange={this.changeDescription}/>           
+                        <ViewButton_s symbol={'✍'} 
+                            func={this.editDescription} 
+                            save={this.saveNewDescription}
+                            style={{float:'right', margin:'-10px'}}
+                            disabled={'true'} 
+                            descriptionUI={!this.state.buttonUI.description}/>
+                    </div>
+                </span>
             </div>
         )//tick, editname, delete, colour
     } 

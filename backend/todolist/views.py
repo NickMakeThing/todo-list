@@ -7,15 +7,23 @@ from rest_framework.response import Response
 from .models import Task, List
 from .serializers import TaskSerializer, ListSerializer, UserSerializer
 
+def updatePriority(updates,tasks):
+    for i in tasks:
+        i.priority = updates[str(i.id)]
+        Task.objects.bulk_update(tasks,['priority'])
+    return
+
 class TasksView(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
-
     #can just dqueryset.update(field1=x,field2=y,field3=..) but will this work for patch/partial update?
     #also can use bulkupdate https://docs.djangoproject.com/en/3.0/ref/models/querysets/#bulk-update
     def patch(self, request, *args, **kwargs): #"PATCH /api/tasks/1/ HTTP/1.1" 405 42 when using partial_update without defining patch
         print('\n\n',request.data,'\n\n')
         tasks = self.get_queryset().filter(id__in=list(request.data['idArr']))
         del request.data['idArr']
+        if 'priority' in request.data:
+            updatePriority(request.data['priority'],tasks)
+            return Response(status=206)
         tasks.update(**request.data)
         return Response(status=206)
 
@@ -26,9 +34,13 @@ class TasksView(viewsets.ModelViewSet):
 
     def delete(self, request, *args, **kwargs):
         #had to define delete because destroy() only responds to delete when sent to /<specifictaskid>
-        stuff=self.get_queryset().filter(id__in=list(request.data))
-        print('\n\n',stuff,'\n\n')
-        self.perform_destroy(stuff) #difference between this and stuff.delete()?
+        print('\n\n',request.data,'\n\n')
+        tasks = self.get_queryset().filter(id__in=list(request.data['idArr']))
+        toDelete=self.get_queryset().filter(id__in=list(request.data['delete']))
+        if not toDelete:
+            return Response()
+        updatePriority(request.data['priority'],tasks)
+        self.perform_destroy(toDelete) #difference between this and stuff.delete()?
         return Response(status=204) #(status=status.HTTP_204_NO_CONTENT) gets 500 NameError: name 'status' is not defined
 
     def get_queryset(self):

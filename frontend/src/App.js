@@ -7,16 +7,16 @@ import Registration from './components/Registration.js'
 class App extends Component {
   constructor(props){
     super(props)
+    this.activeViewContainer = React.createRef()
     this.state = {
       views : {},
       colour : '#079d41',
       activeView : 'Lists',
       loggedIn : false,
       user : {},
-      func : null
+      func : null,
     }
   }
-
   login = (username,password) => {
     var xhr = new XMLHttpRequest()
     xhr.open('POST','http://localhost:8000/login/')
@@ -38,6 +38,18 @@ class App extends Component {
       func : func
     })
   }
+  failSafe = (ref) => {
+    if(ref.current){
+      if(this.state.activeView == 'Lists'){
+        ref.current.click()
+      } else {
+        var mouseUp = document.createEvent('MouseEvents')
+        mouseUp.initEvent('mouseup',true,true)
+        ref.current.dispatchEvent(mouseUp)
+      }
+    }
+  }
+
   changeView = (name, colourCode) => {
     //this worked for some reason -> this.state.activeView = e.target.id
     this.setState({
@@ -74,29 +86,34 @@ class App extends Component {
     })
   }
 
-  closeNavTab = e => {
-    e.stopPropagation()
+  closeNavTab = (e,list) => {
+    if(e){
+      e.stopPropagation()
+      var name = e.target.parentNode.className
+    } else {
+      var name=list
+    }
     var views = JSON.parse(JSON.stringify(this.state.views))
-    var name = e.target.parentNode.className
-    delete views[name]
-    this.setState ({
-      views: views
-    },() =>{
-      if(!this.state.views.length){
-        this.changeView('Lists','#079d41')
-      } else {      
-        let viewKey = Object.keys(this.state.views).slice(-1)[0]
-        this.changeView(viewKey,this.state.views[viewKey].colourCode)
-        //this is annoying if you have another tab open that you are not closing. come back to this.
-      } 
-    })
+    if (views[name]){
+      delete views[name]
+      this.setState ({
+        views: views
+      },() =>{
+        if(!this.state.views.length){
+          this.changeView('Lists','#079d41')
+        } else {      
+          let viewKey = Object.keys(this.state.views).slice(-1)[0]
+          this.changeView(viewKey,this.state.views[viewKey].colourCode)
+        } 
+      })
+    }
   }
   update = (update,callback,path) => {
     var xhr = new XMLHttpRequest()
     xhr.open('PATCH','http://localhost:8000/api/'+path+'/')
     xhr.setRequestHeader('content-type','application/json')
     xhr.setRequestHeader('X-CSRFTOKEN',document.cookie.slice(10))
-    xhr.onload = () => { console.log(xhr.status)
+    xhr.onload = () => { 
         if (xhr.status == 206){
             callback()
             }
@@ -105,6 +122,9 @@ class App extends Component {
 }
 
   componentWillMount(){
+    document.documentElement.style.height = '100%'
+    document.body.style.height = '100%'
+    document.getElementById('root').style.height='90%'
     if (!this.state.loggedIn && localStorage.getItem('loggedIn') == "true"){
       this.setState({
         loggedIn : true
@@ -114,15 +134,19 @@ class App extends Component {
   render() {
     document.body.style.backgroundColor = this.state.colour
     if (this.state.loggedIn){
+      var logout = <a style={{color:'black'}}
+        onClick = {()=>localStorage.setItem('loggedIn', false)}
+        href='http://localhost:8000/logout'>logout</a>
       var views=[]
       for (let i in this.state.views){
         views.push(
         <View className={i} 
-        key={i}
-        listId={this.state.views[i].listId}
-        update={this.update}
-        updateList={this.state.func} 
-        activeView={this.state.activeView}/>
+          key={i}
+          reference={this.activeViewContainer}
+          listId={this.state.views[i].listId}
+          update={this.update}
+          updateList={this.state.func} 
+          activeView={this.state.activeView}/>
         )
       }
       var show = [<NavBar views={this.state.views} 
@@ -130,9 +154,12 @@ class App extends Component {
         changeView={this.changeView}
         activeView={this.state.activeView}/>,
     
-        <div id='views'>
+        <div style={{minHeight:'90%'}} id='views'
+          onClick={()=>this.failSafe(this.activeViewContainer)}>
           <ListView className='Lists'
+            reference={this.activeViewContainer}
             update={this.update}
+            closeNavTab={this.closeNavTab}
             openNavTab={this.openNavTab} 
             editViewColour={this.editViewColour} 
             passFunction={this.passFunction}
@@ -146,8 +173,7 @@ class App extends Component {
     return ( 
       <>
         {show}
-        <a onClick = {()=>localStorage.setItem('loggedIn', false)}
-        href='http://localhost:8000/logout'>logout</a>
+        {logout}
       </>
     )
   }
@@ -158,3 +184,5 @@ export default App;
     //https://scriptverse.academy/tutorials/reactjs-update-array-state.html
     //https://stackoverflow.com/questions/37435334/correct-way-to-push-into-state-array
     //https://www.iconarchive.com
+
+

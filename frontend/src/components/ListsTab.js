@@ -6,10 +6,13 @@ export default class ListsTab extends Component {
 
     constructor(props){
         super(props)
-        this.state = {
+        this.tab = React.createRef()
+    }
+    componentDidUpdate(prevProps){
+        if(prevProps.tabPosMod != this.props.tabPosMod ){
+            this.props.passRect(this.tab.current.getBoundingClientRect().left,'list')
         }
     }
-
     styling = {
         cursor: 'pointer',
         display: 'inline-block',
@@ -26,11 +29,13 @@ export default class ListsTab extends Component {
     }
     
     render() {
-        return <div className='Lists'
-        style={this.styling}
-        onMouseOver={this.hover}
-        onMouseLeave={this.hoverLeave}
-        onClick={(e)=>this.props.changeView(e.target.className,e.target.style.backgroundColor)}
-        >Lists</div>
+        return <div ref={this.tab}
+            className='Lists'
+            style={this.styling}
+            onMouseOver={this.hover}
+            onMouseLeave={this.hoverLeave}
+            onClick={(e)=>this.props.changeView(e.target.className,e.target.style.backgroundColor)}>
+            Lists
+        </div>
     };
 }

@@ -164,6 +164,7 @@ export default class ListView extends Component {
             console.log(xhr.status)
             if (xhr.status == 204){
                     for (let i of listIds){
+                        this.props.closeNavTab(null,lists[i].name)
                         delete lists[i]
                     }
                     this.setState({
@@ -220,10 +221,13 @@ export default class ListView extends Component {
         if (this.state.checkBox!=1) {
                 disabled = false
         }
-        var styling = {margin : '50px', width:'100%' , height:'90%'}
+        var styling = {margin : '50px', width:'90%' , height:'90%'}
+        var ref = 'none'
         if (this.props.activeView != this.props.className) {
             styling.display = 'none'
-        } 
+        } else {
+            ref=this.props.reference
+        }
         var buttons = []
         for (let i in this.state.lists){
             buttons.push(                
@@ -237,7 +241,7 @@ export default class ListView extends Component {
                     />)
         }
         return (
-            <div style={styling} 
+            <div style={styling}  ref = {ref}
                 onClick={this.closeOptions}
                 className={this.props.className}>
                 <input style={{width:'235px'}}onChange={this.inputHandle} value={this.state.input}/><button onClick={this.listCreate}>create</button>

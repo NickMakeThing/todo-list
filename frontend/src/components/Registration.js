@@ -59,58 +59,69 @@ export default class Registration extends Component {
         }
     }
     container = {
+        transform:'scale(125%)',
         color: 'white',
         display:'grid',
         position : 'absolute',
         alignItems : 'center',
         justifyItems : 'center',
-        //gridRowGap : '5px',
-        //gridTemplateColumns : '30%, 70%',
+
         margin : '0 auto',
         top: '50%',
         left:'50%',
-        marginTop : '-100px',
+        marginTop : '-105px',
         marginLeft : '-150px',
         backgroundColor : '#676768',
         border : '20px solid #676768',
-        borderRadius : '20px',
+        //borderTop:'10px',
+        borderBottomLeftRadius : '20px',
+        borderBottomRightRadius : '20px',
         width : '300px',
         height : '200px',
     }
     nav = {
-        mixBlendMode: 'screen',
         fontSize : '80%',
         display : 'grid',
         gridTemplateColumns : '50% 50%',
         textAlign : 'center',
         position : 'absolute',
-        top : -20,
+        borderTopRightRadius : '20px',
+        borderTopLeftRadius : '20px',
+        top : -35,
         width : '340px',
-        height : '10px',
-        //backgroundColor : 'rgba(255,255,255,0.5)',
-        //borderBottomColor : 'black',
+        height : '25px',
+        backgroundColor :  '#676768', //''
+        overflow:'hidden'
+        //opacity:0.5
+        
         //borderRadius : '20px',
+    }//backgroundColor : 'rgba(255,255,255,0.5)',
+    loginTab = {
+        lineHeight : '25px',
     }
-    inactiveTab = {
-        cursor : 'pointer',
-        backgroundColor : 'rgba(255,255,255,0.1)',
-        paddingBottom : '3px'
-    }
-    activeTab = {
-        opacity : '0.5'
-    }
+    registerTab = {
+        lineHeight : '25px',
+    }        //opacity : '0.5'
     render(){
         if (this.state.view == 'login') {
-            var loginStyle = this.activeTab
-            var registerStyle = this.inactiveTab
+            var loginStyle = this.loginTab
+            var registerStyle = Object.assign({
+                backgroundColor : 'rgba(255,255,255,0.1)', 
+                cursor : 'pointer'
+            },{...this.registerTab})
+
             var view = <>
                 Username<input key='logUser' onChange={this.loginUserHandle}/>
                 Password<input key='logPass' onChange={this.loginPassHandle} type={'password'}/>
                 <button onClick={() => this.props.login(this.state.loginUser,this.state.loginPass)}>login</button>
             </>
         } else {
-            var loginStyle = this.inactiveTab
-            var registerStyle = this.activeTab 
+            var loginStyle = Object.assign({
+                backgroundColor : 'rgba(255,255,255,0.1)', 
+                cursor : 'pointer'
+            },{...this.loginTab})
+            var registerStyle = this.registerTab 
+
             var view =  <>
                 Username<input key='regUser' onChange={this.registerUserHandle}/>
                 Password<input key='regPass' onChange={this.registerPassHandle} type={'password'}/>
@@ -119,13 +130,13 @@ export default class Registration extends Component {
             </>
         }
         return(
-            <div style={this.container}>
-                <div style={this.nav}>
-                    <span onClick={this.tabClick} style={registerStyle}>register</span>
-                    <span onClick={this.tabClick} style={loginStyle}>login</span>
+                <div style={this.container}>
+                    <div style={this.nav}>
+                            <span onClick={this.tabClick} style={registerStyle}>register</span>
+                            <span onClick={this.tabClick} style={loginStyle}>login</span>
+                    </div>
+                    {view}
                 </div>
-                {view}
-            </div>
         )
     }
 }

@@ -5,31 +5,26 @@ export default class NavTab extends Component {
 
     constructor(props){
         super(props)
+        this.tab = React.createRef()
     }
-    /*
-    onMouseOver={this.hover}
-    onMouseLeave={this.hoverLeave}
-    
-    hover = e => {
-        //later add preventing of text select/highlight
-        e.target.style.backgroundColor = '#797979'
-        e.preventDefault()
-    }
-    hoverLeave = e => {
-        e.target.style.backgroundColor = '#676767'
-    }*/
 
     xstyle = {
         fontSize: '90%',
         color: 'black',
     }
-    
+    componentDidUpdate(prevProps){
+        if(prevProps.size != this.props.size || prevProps.tabPosMod != this.props.tabPosMod){
+            this.props.passRect(this.tab.current.getBoundingClientRect().right)
+        }
+    }
+    componentDidMount(){
+        this.props.passRect(this.tab.current.getBoundingClientRect().right)
+    }
     render() {
         var styling = {
             cursor: 'pointer',
             display: 'inline-block',
             backgroundColor: this.props.colourCode,
-            //transitionDuration: '0.5s',
             color: 'white',
             paddingTop: '5px',
             paddingBottom: '5px',
@@ -37,12 +32,10 @@ export default class NavTab extends Component {
             marginLeft: '10px',
             horizontalAlign: 'middle',
             textAlign: 'center',
-            fontSize: '110%'
-            //float: 'left',
+            fontSize: '110%',
         }
-        
         if (this.props.activeView != this.props.className) {
-            styling.filter = 'brightness(95%)' //can also do this by just making the text a different colour
+            styling.filter = 'brightness(95%)' 
         }
         if (this.props.className.length > 7){
             var text = this.props.className.slice(0,5)+'...'
@@ -50,7 +43,8 @@ export default class NavTab extends Component {
             var text = this.props.className
         }
 
-        return <div
+        return <div ref={this.tab}
+        key={this.props.className+'tab'}
         className={this.props.className}
         style={styling}
         onClick={(e)=>this.props.changeView(e.target.className,e.target.style.backgroundColor)}>
