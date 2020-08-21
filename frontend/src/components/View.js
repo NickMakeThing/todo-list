@@ -25,7 +25,7 @@ export default class View extends Component {
         for (let i in tasks){
             if (tasks[i].selected){
                 updates.push({id:tasks[i].id,completed:!tasks[i].completed})
-                tasks[i].compelted=!tasks[i].completed 
+                tasks[i].completed=!tasks[i].completed 
             }
         }
         var set = (tasks) => {
@@ -60,6 +60,7 @@ export default class View extends Component {
                 if (tasks[i].selected){
                     updates.push({id:tasks[i].id,taskName:newname})
                     tasks[i].name=newname
+                    break
                 }
             }
             var set = (tasks) => {
@@ -202,7 +203,7 @@ export default class View extends Component {
         for (let i=lower;i<=higher;i++){
             updates.push({id:tasks[i].id,priority:i})
         }
-        this.props.update({updates},()=>null,'tasks/'+this.props.listId)
+        this.props.update(updates,()=>null,'tasks/'+this.props.listId)
     }
     drop = e => {
         if(!this.state.dragging){
@@ -265,7 +266,7 @@ export default class View extends Component {
         var state = this.selectTaskCheck(tasks,buttonUI,count)
         var priorityUpdate = []
         for (let i in updated.priority){
-            priorityUpdate.push({id:i,priority:priorityUpdate[i]})
+            priorityUpdate.push({id:i,priority:updated.priority[i]})
         }
         var xhr = new XMLHttpRequest()
         xhr.open('DELETE','http://localhost:8000/api/tasks/'+this.props.listId+'/')
@@ -376,7 +377,7 @@ export default class View extends Component {
                 description : description
             })
         }
-        this.props.update({update},()=>{set(tasks,buttonUI,description)},'tasks/'+this.props.listId)
+        this.props.update(update,()=>{set(tasks,buttonUI,description)},'tasks/'+this.props.listId)
     }
     changeDescription = e =>{
         var description = JSON.parse(JSON.stringify(this.state.description))

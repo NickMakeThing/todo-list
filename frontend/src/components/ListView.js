@@ -21,19 +21,20 @@ export default class ListView extends Component {
     }
     listColour = (e,id) => {
         var lists = JSON.parse(JSON.stringify(this.state.lists))
-        var idArr = []
         var nameArr = []
         var colour = e.target.style.backgroundColor
+
+        var updates =[]
         if(id){
-            idArr.push(id)
-            nameArr.push(lists[id].name)
+            updates.push({id:id,colour:colour})
             lists[id].colour = colour
+            nameArr.push(lists[id].name)
         } else {
             for (let i in lists){
                 if (lists[i].selected){
-                    idArr.push(i)
-                    nameArr.push(lists[i].name)
+                    updates.push({id:i,colour:colour})
                     lists[i].colour=colour
+                    nameArr.push(lists[i].name)
                 }
             }
         }
@@ -42,7 +43,7 @@ export default class ListView extends Component {
                 lists : lists
             },()=>this.props.editViewColour(nameArr,colour))    
         }
-        this.props.update({idArr : idArr, colour : colour},()=>{set(lists)},'lists')
+        this.props.update(updates,()=>{set(lists)},'lists')
     }
     colourPalette = () => {
         var buttonUI =  JSON.parse(JSON.stringify(this.state.buttonUI))
@@ -53,11 +54,12 @@ export default class ListView extends Component {
     }
     listRename = (e, newname) => {
         if(newname){
+            var updates = []
             var lists =  JSON.parse(JSON.stringify(this.state.lists))
             for (let i in lists){
                 if (lists[i].selected){
+                    updates.push({id:i,listName:newname})
                     lists[i].name=newname
-                    var idArr=[i]
                     break
                 }
             }
@@ -66,7 +68,7 @@ export default class ListView extends Component {
                     lists : lists
                 })    
             }
-            this.props.update({idArr : idArr, listName : newname},()=>{set(lists)},'lists')
+            this.props.update(updates,()=>{set(lists)},'lists')
         } else {
             var buttonUI =  JSON.parse(JSON.stringify(this.state.buttonUI))
             buttonUI.rename = !buttonUI.rename

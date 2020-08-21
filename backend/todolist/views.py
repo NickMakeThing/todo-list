@@ -5,60 +5,41 @@ from rest_framework import viewsets
 from django.http import HttpResponse
 from rest_framework.response import Response
 from .models import Task, List
-from .serializers import TaskSerializer, ListSerializer, UserSerializer, LoginSerializer
+from .serializers import TaskSerializer, ListSerializer, UserSerializer, LoginSerializer, UpdateSerializer
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
-def updatePriority(updates,tasks,serializerCallback):
-    for i in tasks:
-        i.priority = updates[str(i.id)]
-    Task.objects.bulk_update(tasks,['priority'])
+def updateItems(updates,model):
+    serializer = UpdateSerializer(data=updates, many=True, partial=True)
+    serializer.is_valid(raise_exception=True)
+    data = serializer.validated_data
+    fields = [field for field in data[0].keys() if not 'id' in field]
+    print('fields: ',fields)
+    instances = [model(**item) for item in data]
+    print('\n\n',instances,'\n\n')
+    model.objects.bulk_update(instances,fields)
     return
+
 #context manager
 #@atomic_transaction
 #@detail_route or @action for priority
-class TasksView(viewsets.ModelViewSet):
+class TasksView(viewsets.ModelViewSet): #authentication and permission classes
     serializer_class = TaskSerializer
     #can just dqueryset.update(field1=x,field2=y,field3=..) but will this work for patch/partial update?
     #also can use bulkupdate https://docs.djangoproject.com/en/3.0/ref/models/querysets/#bulk-update
     def patch(self, request, *args, **kwargs): #"PATCH /api/tasks/1/ HTTP/1.1" 405 42 when using partial_update without defining patch
         print('\n\n',request.data,'\n\n')
-        serializer = TaskSerializer(data=request.data, many=True, partial=True)
-        serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
-        
-        tasks = [Task(**item) for item in data]
-        print('\n\n',data,'\n\n')
-        Task.objects.bulk_update(tasks,list(request.data.pop())[-1:])
+        updateItems(request.data,Task)
         return Response(status=206)
-        """tasks = self.get_queryset().filter(id__in=list(request.data['idArr']))
-        del request.data['idArr']
-        if 'priority' in request.data:
-            updatePriority(request.data['priority'],tasks,self.get_serializer)
-            return Response(status=206)
-        #success in detecting max char count in coulour,failed to detect wrong id input
-        #bigger problem is format to validate many partial is vastly different from format to use .update(**args) and bulk_update
-        #a=[{'id':'abc','colour':'123456789012345678901234567890'},{'id':247,'colour':'123456789012345678901234567890'}]
-        #serializer = self.get_serializer(data=a, many=True, partial=True)
-        #serializer.is_valid(raise_exception=True) #returns true
-        #print(serializer.is_valid(raise_exception=True))
-        tasks.update(**request.data)
-        return Response(status=206)"""
-
-    """def partial_update(self, request, *args, **kwargs): #"PATCH /api/tasks/1/ HTTP/1.1" 405 42
-        print('\n\n',request.data,'\n\n')
-        kwargs['partial'] = True
-        return self.update(request, *args, **kwargs)"""
 
     def delete(self, request, *args, **kwargs):
         #had to define delete because destroy() only responds to delete when sent to /<specifictaskid>
         print('\n\n',request.data,'\n\n')
-        tasks = self.get_queryset().filter(id__in=list(request.data['idArr']))
-        toDelete=self.get_queryset().filter(id__in=list(request.data['delete']))
+        updateItems(request.data['update'],Task)
+        toDelete = self.get_queryset().filter(id__in=request.data['delete'])
         if not toDelete:
             return Response()
-        updatePriority(request.data['priority'],tasks,self.get_serializer)
         self.perform_destroy(toDelete) #difference between this and stuff.delete()?
         return Response(status=204) #(status=status.HTTP_204_NO_CONTENT) gets 500 NameError: name 'status' is not defined
 
@@ -93,11 +74,8 @@ class ListsView(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def patch(self, request, *args, **kwargs): 
-        print(self.request.user)
         print('\n\n',request.data,'\n\n')
-        tasks = self.get_queryset().filter(id__in=list(request.data['idArr']))
-        del request.data['idArr']
-        tasks.update(**request.data)
+        updateItems(request.data,List)
         return Response(status=206)
         
     def delete(self, request, *args, **kwargs):
