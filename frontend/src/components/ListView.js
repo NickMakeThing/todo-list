@@ -19,53 +19,6 @@ export default class ListView extends Component {
             input : e.target.value
         })
     }
-    selectList = (e,id) => {
-        e.stopPropagation()
-        var lists =     JSON.parse(JSON.stringify(this.state.lists))
-        var buttonUI =  JSON.parse(JSON.stringify(this.state.buttonUI))
-        var count, del, colour, removeTag
-        if (lists[id].selected){
-            count = this.state.checkBox-1
-        } else {
-            count = this.state.checkBox+1
-        }
-        if (count>1){
-            removeTag = true
-        }
-        if (count>=1){
-            colour = del = true
-        }
-        var rename = removeTag ? false : this.state.buttonUI.rename
-        lists[id].selected = !lists[id].selected
-        var firstCheck = true
-        for (let i in lists){
-            if (lists[i].selected){
-                if (firstCheck) {
-                    var first = lists[i].completed
-                    firstCheck = false
-                } else {
-                    if (lists[i].completed!=first){
-                        var check = false
-                        break
-                    }
-                }
-            }
-        } 
-        var palette = this.state.buttonUI.colour.palette
-        if (count == 0) {
-            palette = rename = del = false 
-        }
-        buttonUI = {
-            rename: rename, 
-            colour: {colour : colour, palette : palette},
-            delete : del,
-        }
-        this.setState({
-            lists : lists,
-            checkBox : count,
-            buttonUI : buttonUI
-        })
-    }
     listColour = (e,id) => {
         var lists = JSON.parse(JSON.stringify(this.state.lists))
         var idArr = []
@@ -146,16 +99,19 @@ export default class ListView extends Component {
                     })
                 }
             }
-            xhr.send(JSON.stringify({listName : this.state.input, userid:1}))
+            xhr.send(JSON.stringify({listName : this.state.input}))
     }
     deleteList = ()=> {
         var listIds = []
         var lists =  JSON.parse(JSON.stringify(this.state.lists))
+        var buttonUI =  JSON.parse(JSON.stringify(this.state.buttonUI))
         for (let i in lists){
             if (lists[i].selected){
                 listIds.push(i)
             }
         }
+        var count = this.state.checkBox-listIds.length
+        var state = this.selectListCheck(buttonUI,count)
         var xhr = new XMLHttpRequest()
         xhr.open('DELETE','http://localhost:8000/api/lists/')
         xhr.setRequestHeader('content-type','application/json')
@@ -168,11 +124,51 @@ export default class ListView extends Component {
                         delete lists[i]
                     }
                     this.setState({
+                        buttonUI: state.buttonUI,
+                        checkBox: state.count,
                         lists: lists,
                     })
                 } 
             }
         xhr.send(JSON.stringify(listIds))
+    }
+    selectListCheck = (buttonUI,count) => {
+        var palette = this.state.buttonUI.colour.palette
+        if (count>1){
+            var removeTag = true
+        }
+        if (count>=1){
+            var del = true
+            var colour = true
+        }
+        if (count == 0) {
+            palette = rename = del = false 
+        }
+        var rename = removeTag ? false : this.state.buttonUI.rename
+        buttonUI = {
+            rename: rename, 
+            colour: {colour : colour, palette : palette},
+            delete : del,
+        }
+        return{count:count,buttonUI:buttonUI}
+    }
+    selectList = (e,id) => {
+        e.stopPropagation()
+        var lists =     JSON.parse(JSON.stringify(this.state.lists))
+        var buttonUI =  JSON.parse(JSON.stringify(this.state.buttonUI))
+        if (lists[id].selected){
+            var count = this.state.checkBox-1
+        } else {
+            var count = this.state.checkBox+1
+        }
+        
+        lists[id].selected = !lists[id].selected
+        var state = this.selectListCheck(buttonUI,count)
+        this.setState({
+            lists : lists,
+            checkBox : state.count,
+            buttonUI : state.buttonUI
+        })
     }
     componentDidMount(){
         if (!this.state.listsLoaded) {
@@ -210,12 +206,11 @@ export default class ListView extends Component {
         })
     }
     buttonsStyle = {
-        marginLeft : '255px', 
+        left : '305px', 
         position : 'absolute', 
         marginTop : '10px',
         top : '130px'
     }
-    
     render(){
         var disabled = true
         if (this.state.checkBox!=1) {
@@ -244,13 +239,13 @@ export default class ListView extends Component {
             <div style={styling}  ref = {ref}
                 onClick={this.closeOptions}
                 className={this.props.className}>
-                <input style={{width:'235px'}}onChange={this.inputHandle} value={this.state.input}/><button onClick={this.listCreate}>create</button>
+                <input style={{width:'235px'}} maxLength={25} onChange={this.inputHandle} value={this.state.input}/><button onClick={this.listCreate}>create</button>
                 {buttons}
                 <span style={this.buttonsStyle}>
                     <ViewButton_s symbol={'✍'} disabled={disabled} 
                         func={this.listRename} 
                         renameUI={this.state.buttonUI.rename}/>    
-                    <ViewButton_s img={'colour.png'} 
+                    <ViewButton_s img={'/static/colour.png'} 
                         listView={true}
                         checkBox={this.state.checkBox}
                         className={this.props.className}
@@ -258,7 +253,7 @@ export default class ListView extends Component {
                         update={this.listColour}
                         disabled={this.state.buttonUI.colour.colour} 
                         colourUI={this.state.buttonUI.colour.palette}/>
-                    <ViewButton_s img={'delete.png'} l='7px' 
+                    <ViewButton_s img={'/static/delete.png'} l='7px' 
                         func={this.deleteList} 
                         disabled={this.state.buttonUI.delete}/> {/* need better trash icon */}
                 </span>

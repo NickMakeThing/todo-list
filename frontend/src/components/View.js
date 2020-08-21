@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import Task from './Task'
-import ViewButton from './ViewButton'
 import ViewButton_s from './ViewButton(sidebar)'
 
 export default class View extends Component {
@@ -22,13 +21,11 @@ export default class View extends Component {
     }
     taskComplete = () => {
         var tasks =  JSON.parse(JSON.stringify(this.state.tasks))
-        var idArr = []
-        var status
+        var updates = []
         for (let i in tasks){
             if (tasks[i].selected){
-                status = !tasks[i].completed
-                tasks[i].completed=!tasks[i].completed
-                idArr.push(tasks[i].id)
+                updates.push({id:tasks[i].id,completed:!tasks[i].completed})
+                tasks[i].compelted=!tasks[i].completed 
             }
         }
         var set = (tasks) => {
@@ -36,16 +33,16 @@ export default class View extends Component {
                 tasks : tasks
             })    
         }
-        this.props.update({idArr : idArr, completed : status},()=>{set(tasks)},'tasks/'+this.props.listId)
+        this.props.update(updates,()=>{set(tasks)},'tasks/'+this.props.listId)
     }
     taskColour = e => {
         var tasks = JSON.parse(JSON.stringify(this.state.tasks))
-        var idArr = []
         var colour = e.target.style.backgroundColor
+        var updates = []
         for (let i in tasks){
             if (tasks[i].selected){
-                idArr.push(tasks[i].id)
-                tasks[i].colour=e.target.style.backgroundColor
+                updates.push({id:tasks[i].id,colour:colour})
+                tasks[i].colour=colour 
             }
         }
         var set = (tasks) => {
@@ -53,16 +50,16 @@ export default class View extends Component {
                 tasks : tasks
             })    
         }
-        this.props.update({idArr : idArr, colour : colour},()=>{set(tasks)},'tasks/'+this.props.listId)
+        this.props.update(updates,()=>{set(tasks)},'tasks/'+this.props.listId)
     }
     taskRename = (e, newname) => {
         if(newname){
             var tasks =  JSON.parse(JSON.stringify(this.state.tasks))
+            var updates = []
             for (let i in tasks){
                 if (tasks[i].selected){
+                    updates.push({id:tasks[i].id,taskName:newname})
                     tasks[i].name=newname
-                    var idArr=[tasks[i].id]
-                    break
                 }
             }
             var set = (tasks) => {
@@ -70,7 +67,7 @@ export default class View extends Component {
                     tasks : tasks
                 })    
             }
-            this.props.update({idArr : idArr, taskName : newname},()=>{set(tasks)},'tasks/'+this.props.listId)
+            this.props.update(updates,()=>{set(tasks)},'tasks/'+this.props.listId)
         } else {
             var buttonUI =  JSON.parse(JSON.stringify(this.state.buttonUI))
             var description = JSON.parse(JSON.stringify(this.state.description))
@@ -195,18 +192,17 @@ export default class View extends Component {
     }
     taskOrderUpdate = () => {
         var fromTo = JSON.parse(JSON.stringify(this.state.priorityUpdateInfo))
+        var tasks = JSON.parse(JSON.stringify(this.state.tasks))
         if (fromTo.draggedFrom==fromTo.draggedTo) {
             return
         }
         var higher = Math.max(fromTo.draggedFrom,fromTo.draggedTo)
         var lower = Math.min(fromTo.draggedFrom,fromTo.draggedTo)
-        var update = {} 
-        var idArr = []
+        var updates = []
         for (let i=lower;i<=higher;i++){
-            update[this.state.tasks[i].id]=i
-            idArr.push(this.state.tasks[i].id)
+            updates.push({id:tasks[i].id,priority:i})
         }
-        this.props.update({idArr:idArr,priority:update},()=>null,'tasks/'+this.props.listId)
+        this.props.update({updates},()=>null,'tasks/'+this.props.listId)
     }
     drop = e => {
         if(!this.state.dragging){
@@ -230,7 +226,7 @@ export default class View extends Component {
             })
         }
     }    
-    updatePriority = tasks => {
+    fixPriority = tasks => {
         var count = 0
         var priority = {} 
         var idArr = []
@@ -243,9 +239,6 @@ export default class View extends Component {
             }
             count++
         }
-        /*if(idArr.length){
-            this.props.update({idArr:idArr,priority:priority},()=>null,'tasks/'+this.props.listId)
-        }*/
         return { tasks : tasks, idArr : idArr, priority: priority}
     }
     taskDelete = ()=> {
@@ -267,9 +260,13 @@ export default class View extends Component {
             }
             delete tasks[i]
         }
-        var updated = this.updatePriority(tasks)
+        var updated = this.fixPriority(tasks)
         tasks = updated.tasks
         var state = this.selectTaskCheck(tasks,buttonUI,count)
+        var priorityUpdate = []
+        for (let i in updated.priority){
+            priorityUpdate.push({id:i,priority:priorityUpdate[i]})
+        }
         var xhr = new XMLHttpRequest()
         xhr.open('DELETE','http://localhost:8000/api/tasks/'+this.props.listId+'/')
         xhr.setRequestHeader('content-type','application/json')
@@ -284,7 +281,7 @@ export default class View extends Component {
                 })
             } 
         }
-        xhr.send(JSON.stringify({delete:taskIds, idArr:updated.idArr, priority:updated.priority}))
+        xhr.send(JSON.stringify({delete:taskIds, update:priorityUpdate}))
     } 
     taskCreate = () => { //remember to takeout cors middleware
         for (let i of Object.values(this.state.tasks)) {
@@ -365,7 +362,10 @@ export default class View extends Component {
         var description = JSON.parse(JSON.stringify(this.state.description))
         var buttonUI = JSON.parse(JSON.stringify(this.state.buttonUI))
         var tasks = JSON.parse(JSON.stringify(this.state.tasks))
-        var idArr = [description.task.id]
+        var update = [{
+            id:description.task.id,
+            description:description.content
+        }]
         description.modified = false
         buttonUI.description = !buttonUI.description
         tasks[description.task.priority].description=description.content
@@ -376,7 +376,7 @@ export default class View extends Component {
                 description : description
             })
         }
-        this.props.update({idArr : idArr, description : description.content},()=>{set(tasks,buttonUI,description)},'tasks/'+this.props.listId)
+        this.props.update({update},()=>{set(tasks,buttonUI,description)},'tasks/'+this.props.listId)
     }
     changeDescription = e =>{
         var description = JSON.parse(JSON.stringify(this.state.description))
@@ -522,6 +522,7 @@ export default class View extends Component {
                 className={this.props.className}>
                 <span style={{position : 'absolute'}}> 
                     <input key="taskCreationInput" 
+                        maxLength={40}
                         style={this.inputStyle}
                         onChange={this.inputHandle} 
                         value={this.state.input}/>
@@ -533,7 +534,7 @@ export default class View extends Component {
                         func={this.taskRename} 
                         mouseUpFix={this.mouseUpFix}
                         renameUI={this.state.buttonUI.rename}/>    
-                    <ViewButton_s img={'colour.png'} 
+                    <ViewButton_s img={'/static/colour.png'} 
                         checkBox={this.state.checkBox}
                         editViewColour={this.props.editViewColour} 
                         className={this.props.className}
@@ -548,7 +549,7 @@ export default class View extends Component {
                         func={this.taskComplete} 
                         mouseUpFix={this.mouseUpFix}
                         disabled={this.state.buttonUI.check}/> 
-                    <ViewButton_s img={'delete.png'} l='7px' 
+                    <ViewButton_s img={'/static/delete.png'} l='7px' 
                         func={this.taskDelete} 
                         mouseUpFix={this.mouseUpFix}
                         disabled={this.state.buttonUI.delete}/> {/* need better trash icon */}
@@ -566,6 +567,7 @@ export default class View extends Component {
                         </span>
                         {modified}
                         <textarea value={this.state.description.content} 
+                            maxLength={250}
                             ref={this.textArea}
                             style={this.textAreaStyle} 
                             readOnly={this.state.buttonUI.description}
@@ -582,19 +584,3 @@ export default class View extends Component {
         )//tick, editname, delete, colour
     } 
 }
-/*
-                <span style={{marginLeft : '255px', position : 'absolute', marginTop : '5px'}}>
-                    <ViewButton_s symbol={'✔'}/> 
-                    <ViewButton_s symbol={'✍'}/>    
-                    <ViewButton_s img={'colour.png'}/>
-                    <ViewButton_s img={'delete.png'} l='7px'/> 
-                </span>
-*/
-/*
-                <span style={{marginLeft : '5px'}}>
-                    <ViewButton symbol={'✔'}/> 
-                    <ViewButton symbol={'✍'}/>  
-                    <ViewButton img={'delete.png'}/>  
-                    <ViewButton img={'colour.png'}/> 
-                </span>
-*/

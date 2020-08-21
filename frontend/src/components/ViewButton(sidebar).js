@@ -135,6 +135,7 @@ export default class ViewButton extends Component{
             var ui = (
                 <span style={this.renameContainer}>
                     <input style={this.renameStyle}
+                        maxLength={40}
                         onChange={e=>this.setState({value:e.target.value})} 
                         autoFocus='true'/>
                     <button style={this.renameButton}

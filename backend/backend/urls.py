@@ -6,7 +6,7 @@ from todolist import views
 
 router = routers.DefaultRouter()
 router.register(r'tasks/(?P<listId>[0-9]+)', views.TasksView, basename='tasks')
-router.register('lists', views.ListsView)
+router.register('lists', views.ListsView, basename='lists')
 urlpatterns = [
     path('admin/', admin.site.urls), 
     path('register/', views.RegistrationView.as_view()), #wont work in router.register because not a viewset? https://stackoverflow.com/questions/56052906/django-rest-framework-type-object-x-has-no-attribute-get-extra-actions/56053013

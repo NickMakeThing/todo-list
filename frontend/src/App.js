@@ -17,7 +17,7 @@ class App extends Component {
       func : null,
     }
   }
-  login = (username,password) => {
+  login = (username,password,callback) => {
     var xhr = new XMLHttpRequest()
     xhr.open('POST','http://localhost:8000/login/')
     xhr.setRequestHeader('content-type','application/json')
@@ -28,6 +28,8 @@ class App extends Component {
         this.setState ({
           loggedIn : true
         })
+      } else {
+        callback(JSON.parse(xhr.response))
       } 
       //setstate loggedin true, user {id and name?}
     }

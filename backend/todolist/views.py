@@ -5,27 +5,46 @@ from rest_framework import viewsets
 from django.http import HttpResponse
 from rest_framework.response import Response
 from .models import Task, List
-from .serializers import TaskSerializer, ListSerializer, UserSerializer
+from .serializers import TaskSerializer, ListSerializer, UserSerializer, LoginSerializer
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
 
-def updatePriority(updates,tasks):
+def updatePriority(updates,tasks,serializerCallback):
     for i in tasks:
         i.priority = updates[str(i.id)]
-        Task.objects.bulk_update(tasks,['priority'])
+    Task.objects.bulk_update(tasks,['priority'])
     return
-
+#context manager
+#@atomic_transaction
+#@detail_route or @action for priority
 class TasksView(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
     #can just dqueryset.update(field1=x,field2=y,field3=..) but will this work for patch/partial update?
     #also can use bulkupdate https://docs.djangoproject.com/en/3.0/ref/models/querysets/#bulk-update
     def patch(self, request, *args, **kwargs): #"PATCH /api/tasks/1/ HTTP/1.1" 405 42 when using partial_update without defining patch
         print('\n\n',request.data,'\n\n')
-        tasks = self.get_queryset().filter(id__in=list(request.data['idArr']))
+        serializer = TaskSerializer(data=request.data, many=True, partial=True)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        
+        tasks = [Task(**item) for item in data]
+        print('\n\n',data,'\n\n')
+        Task.objects.bulk_update(tasks,list(request.data.pop())[-1:])
+        return Response(status=206)
+        """tasks = self.get_queryset().filter(id__in=list(request.data['idArr']))
         del request.data['idArr']
         if 'priority' in request.data:
-            updatePriority(request.data['priority'],tasks)
+            updatePriority(request.data['priority'],tasks,self.get_serializer)
             return Response(status=206)
+        #success in detecting max char count in coulour,failed to detect wrong id input
+        #bigger problem is format to validate many partial is vastly different from format to use .update(**args) and bulk_update
+        #a=[{'id':'abc','colour':'123456789012345678901234567890'},{'id':247,'colour':'123456789012345678901234567890'}]
+        #serializer = self.get_serializer(data=a, many=True, partial=True)
+        #serializer.is_valid(raise_exception=True) #returns true
+        #print(serializer.is_valid(raise_exception=True))
         tasks.update(**request.data)
-        return Response(status=206)
+        return Response(status=206)"""
 
     """def partial_update(self, request, *args, **kwargs): #"PATCH /api/tasks/1/ HTTP/1.1" 405 42
         print('\n\n',request.data,'\n\n')
@@ -39,12 +58,12 @@ class TasksView(viewsets.ModelViewSet):
         toDelete=self.get_queryset().filter(id__in=list(request.data['delete']))
         if not toDelete:
             return Response()
-        updatePriority(request.data['priority'],tasks)
+        updatePriority(request.data['priority'],tasks,self.get_serializer)
         self.perform_destroy(toDelete) #difference between this and stuff.delete()?
         return Response(status=204) #(status=status.HTTP_204_NO_CONTENT) gets 500 NameError: name 'status' is not defined
 
     def get_queryset(self):
-        return Task.objects.filter(listId=self.kwargs['listId'])
+        return Task.objects.filter(listId=self.kwargs['listId']) # and do join to check if list has userid
         
     def destroy(self, request, *args, **kwargs):
         print(request.data)
@@ -53,9 +72,28 @@ class TasksView(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
         
 class ListsView(viewsets.ModelViewSet):
-    queryset = List.objects.all()
     serializer_class = ListSerializer
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get_queryset(self):
+        print(self.request.user)
+        return List.objects.filter(userid=self.request.user)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        request.data['userid']=request.user.id
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def patch(self, request, *args, **kwargs): 
+        print(self.request.user)
         print('\n\n',request.data,'\n\n')
         tasks = self.get_queryset().filter(id__in=list(request.data['idArr']))
         del request.data['idArr']
@@ -63,9 +101,9 @@ class ListsView(viewsets.ModelViewSet):
         return Response(status=206)
         
     def delete(self, request, *args, **kwargs):
-        stuff=self.get_queryset().filter(id__in=list(request.data))
-        print('\n\n',stuff,'\n\n')
-        self.perform_destroy(stuff) 
+        lists=self.get_queryset().filter(id__in=list(request.data))
+        print('\n\n',lists,'\n\n')
+        self.perform_destroy(lists) 
         return Response(status=204)
  
 class RegistrationView(CreateAPIView):
@@ -73,18 +111,10 @@ class RegistrationView(CreateAPIView):
 
 class Login(GenericAPIView): #add validation. use serializer for validation?
     def post(self, request, *args, **kwargs):
-        print(request.data)
-        username = request.data['username']
-        password = request.data['password']
-        check = auth.authenticate(username=username,password=password)
-        print(check)
-        if check:
-            print('success')
-            auth.login(request, check)
-            return Response('Success')
-        else:
-            print('fail')
-            return Response('Login failed')
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        auth.login(request,serializer.validated_data)
+        return Response('Success')
 
 def logout(request):
     auth.logout(request)
