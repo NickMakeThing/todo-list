@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import ListButtons from './ListButtons'
 import ViewButton_s from './ViewButton(sidebar)'
-
+import Cookies from 'js-cookie'
 export default class ListView extends Component {
     constructor(props){
         super(props)
@@ -85,7 +85,7 @@ export default class ListView extends Component {
             var xhr = new XMLHttpRequest()
             xhr.open('POST','http://localhost:8000/api/lists/')
             xhr.setRequestHeader('content-type','application/json')
-            xhr.setRequestHeader('X-CSRFTOKEN',document.cookie.slice(10))
+            xhr.setRequestHeader('X-CSRFTOKEN',Cookies.get('csrftoken'))
             xhr.onload = () => {
                 if (xhr.status == 201){
                     var response = JSON.parse(xhr.response)
@@ -117,7 +117,7 @@ export default class ListView extends Component {
         var xhr = new XMLHttpRequest()
         xhr.open('DELETE','http://localhost:8000/api/lists/')
         xhr.setRequestHeader('content-type','application/json')
-        xhr.setRequestHeader('X-CSRFTOKEN',document.cookie.slice(10))
+        xhr.setRequestHeader('X-CSRFTOKEN',Cookies.get('csrftoken'))
         xhr.onload = () => {
             console.log(xhr.status)
             if (xhr.status == 204){

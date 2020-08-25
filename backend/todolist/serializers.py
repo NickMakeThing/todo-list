@@ -8,7 +8,7 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ('id','listId','taskName','priority','completed','colour','description')
-
+    
 class UpdateSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     priority = serializers.IntegerField()
@@ -27,12 +27,6 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id','username','password')
-    def validate(self, data):
-        if data['password']!=data[password2]:
-            raise serializer.ValidationError(
-                'Passwords do not match'
-            )
-        return data
     def create(self, validated):
         print(validated)
         user = User.objects.create_user(
@@ -50,11 +44,11 @@ class LoginSerializer(serializers.Serializer):
             username = User.objects.get(username=data['username'])
         except:
             raise serializers.ValidationError(
-                'This username does not exist'
+                {'username':'This username does not exist'}
             )
         if not username.check_password(data['password']):
             raise serializers.ValidationError(
-                'Incorrect password'
+                {'password':'Incorrect password'}
             )
         return username
     

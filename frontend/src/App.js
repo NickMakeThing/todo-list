@@ -3,7 +3,7 @@ import NavBar from './components/NavBar'
 import View from './components/View.js'
 import ListView from './components/ListView.js'
 import Registration from './components/Registration.js'
-
+import Cookies from 'js-cookie'
 class App extends Component {
   constructor(props){
     super(props)
@@ -114,7 +114,7 @@ class App extends Component {
     var xhr = new XMLHttpRequest()
     xhr.open('PATCH','http://localhost:8000/api/'+path+'/')
     xhr.setRequestHeader('content-type','application/json')
-    xhr.setRequestHeader('X-CSRFTOKEN',document.cookie.slice(10))
+    xhr.setRequestHeader('X-CSRFTOKEN',Cookies.get('csrftoken'))
     xhr.onload = () => { 
         if (xhr.status == 206){
             callback()

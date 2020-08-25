@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import Task from './Task'
 import ViewButton_s from './ViewButton(sidebar)'
+import Cookies from 'js-cookie'
 
 export default class View extends Component {
     constructor(props){
@@ -271,7 +272,7 @@ export default class View extends Component {
         var xhr = new XMLHttpRequest()
         xhr.open('DELETE','http://localhost:8000/api/tasks/'+this.props.listId+'/')
         xhr.setRequestHeader('content-type','application/json')
-        xhr.setRequestHeader('X-CSRFTOKEN',document.cookie.slice(10))
+        xhr.setRequestHeader('X-CSRFTOKEN',Cookies.get('csrftoken'))
         xhr.onload = () => {
             if (xhr.status == 204){
                 this.setState({
@@ -291,7 +292,7 @@ export default class View extends Component {
         var xhr = new XMLHttpRequest()
         xhr.open('POST','http://localhost:8000/api/tasks/'+this.props.listId+'/')
         xhr.setRequestHeader('content-type','application/json')
-        xhr.setRequestHeader('X-CSRFTOKEN',document.cookie.slice(10))
+        xhr.setRequestHeader('X-CSRFTOKEN',Cookies.get('csrftoken'))
         xhr.onload = () => {
             if (xhr.status == 201){
                 var response = JSON.parse(xhr.response)
