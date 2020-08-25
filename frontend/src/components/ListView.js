@@ -119,7 +119,6 @@ export default class ListView extends Component {
         xhr.setRequestHeader('content-type','application/json')
         xhr.setRequestHeader('X-CSRFTOKEN',Cookies.get('csrftoken'))
         xhr.onload = () => {
-            console.log(xhr.status)
             if (xhr.status == 204){
                     for (let i of listIds){
                         this.props.closeNavTab(null,lists[i].name)

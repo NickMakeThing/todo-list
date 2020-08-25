@@ -22,7 +22,6 @@ class App extends Component {
     xhr.open('POST','http://localhost:8000/login/')
     xhr.setRequestHeader('content-type','application/json')
     xhr.onload = () => {
-      console.log(xhr.response)
       if (xhr.response == '"Success"') {
         localStorage.setItem('loggedIn', true)
         this.setState ({

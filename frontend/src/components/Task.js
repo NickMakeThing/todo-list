@@ -69,10 +69,18 @@ export default class Task extends Component {
     }
     componentDidMount(){
         if(this.textSpan.current.scrollWidth>200){
-            this.setState({
-                lineHeight:'25px',
-                wordBreak:'break-all'
-            })
+            if (this.props.name.indexOf(' ')>-1){
+                this.setState({
+                    lineHeight:'25px',
+                    wordBreak:'normal'
+                })
+            } else {
+                this.setState({
+                    lineHeight:'25px',
+                    wordBreak:'break-all'
+                })
+            }
+            
         }
     }
     render() {

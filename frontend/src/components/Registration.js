@@ -3,6 +3,7 @@ import React, {Component} from 'react'
 export default class Registration extends Component {
     constructor(props){
         super(props)
+            this.loginTab = React.createRef()
             this.state = {
                 view : 'login',
                 loginUser : '',
@@ -64,8 +65,12 @@ export default class Registration extends Component {
             xhr.open('POST','http://localhost:8000/register/')
             xhr.setRequestHeader('content-type','application/json')
             xhr.onload = () => {
-                console.log('response:',xhr.response,'status:',xhr.status)
-                this.errorHandle(JSON.parse(xhr.response))
+                var response = JSON.parse(xhr.response)
+                if(response == 'user created'){
+                    this.loginTab.current.click()
+                } else {
+                    this.errorHandle(response)
+                }
             }
             xhr.send(JSON.stringify({username: this.state.registerUser, password: this.state.registerPass, password2: this.state.registerPass2}))
         }
@@ -166,14 +171,15 @@ export default class Registration extends Component {
         backgroundColor: '#777777',
         borderRadius:'5px'
     }
-    loginTab = {
+    loginTabStyle = {
+        userSelect : 'none',
         lineHeight : '25px',
     }
-    registerTab = {
+    registerTabStyle = {
+        userSelect : 'none',
         lineHeight : '25px',
-    }    //stylecomponents
+    }   
     render(){
-        //console.log(this.state.inputErrors)
         var errorUsername, errorPassword, errorPassword2
         var userInputStyle = {boxShadow : 'none'}
         var passInputStyle = {boxShadow : 'none'}
@@ -196,11 +202,11 @@ export default class Registration extends Component {
             }
         }
         if (this.state.view == 'login') {
-            var loginStyle = this.loginTab
+            var loginStyle = this.loginTabStyle
             var registerStyle = Object.assign({
                 backgroundColor : 'rgba(255,255,255,0.1)', 
                 cursor : 'pointer'
-            },{...this.registerTab})
+            },{...this.registerTabStyle})
 
             var view = <>
                 Username<span><input key='logUser' style={userInputStyle} onChange={this.loginUserHandle}/>{errorUsername}</span>
@@ -211,8 +217,8 @@ export default class Registration extends Component {
             var loginStyle = Object.assign({
                 backgroundColor : 'rgba(255,255,255,0.1)', 
                 cursor : 'pointer'
-            },{...this.loginTab})
-            var registerStyle = this.registerTab 
+            },{...this.loginTabStyle})
+            var registerStyle = this.registerTabStyle
 
             var view =  <>
                 Username<span><input key='regUser' style={userInputStyle} onChange={this.registerUserHandle}/>{errorUsername}</span>
@@ -225,7 +231,7 @@ export default class Registration extends Component {
             <div style={this.container}>
                 <div style={this.nav}>
                         <span onClick={this.tabClick} style={registerStyle}>register</span>
-                        <span onClick={this.tabClick} style={loginStyle}>login</span>
+                        <span onClick={this.tabClick} style={loginStyle} ref={this.loginTab}>login</span>
                 </div>
                 {view}
             </div>

@@ -118,6 +118,11 @@ class ListsView(viewsets.ModelViewSet):
  
 class RegistrationView(CreateAPIView):
     serializer_class = UserSerializer
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response('user created', status=status.HTTP_201_CREATED)
 
 class Login(GenericAPIView): #add validation. use serializer for validation?
     def post(self, request, *args, **kwargs):
