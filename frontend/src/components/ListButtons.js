@@ -9,6 +9,7 @@ export default class ListButtons extends Component {
 //queue animation: when oppened or is already opened, 
 
     styling = {
+        cursor : 'pointer',
         display : 'block',
         position : 'relative',
         marginTop : '20px',

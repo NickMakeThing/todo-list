@@ -206,10 +206,16 @@ export default class ListView extends Component {
             buttonUI : buttonUI,
         })
     }
+    inputStyle = {
+        width:'235px',
+        webkitLogicalWidth : '242px',
+        fontSize: '14px', 
+    }
     buttonsStyle = {
         left : '305px', 
         position : 'absolute', 
         marginTop : '10px',
+        webkitMarginBefore : -3,
         top : '130px'
     }
     render(){
@@ -240,12 +246,9 @@ export default class ListView extends Component {
             <div style={styling}  ref = {ref}
                 onClick={this.closeOptions}
                 className={this.props.className}>
-                <input style={{width:'235px'}} maxLength={25} onChange={this.inputHandle} value={this.state.input}/><button onClick={this.listCreate}>create</button>
+                <input style={this.inputStyle} maxLength={25} onChange={this.inputHandle} value={this.state.input}/><button onClick={this.listCreate}>create</button>
                 {buttons}
                 <span style={this.buttonsStyle}>
-                    <ViewButton_s symbol={'✍'} disabled={disabled} 
-                        func={this.listRename} 
-                        renameUI={this.state.buttonUI.rename}/>    
                     <ViewButton_s img={'/static/colour.png'} 
                         listView={true}
                         checkBox={this.state.checkBox}
@@ -257,6 +260,9 @@ export default class ListView extends Component {
                     <ViewButton_s img={'/static/delete.png'} l='7px' 
                         func={this.deleteList} 
                         disabled={this.state.buttonUI.delete}/> {/* need better trash icon */}
+                    <ViewButton_s symbol={'✎'} disabled={disabled} 
+                        func={this.listRename} 
+                        renameUI={this.state.buttonUI.rename}/>    
                 </span>
             </div>
         )

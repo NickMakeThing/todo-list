@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import Cookies from 'js-cookie'
 
 export default class Registration extends Component {
     constructor(props){
@@ -64,6 +65,7 @@ export default class Registration extends Component {
             var xhr = new XMLHttpRequest()
             xhr.open('POST','http://localhost:8000/register/')
             xhr.setRequestHeader('content-type','application/json')
+            xhr.setRequestHeader('X-CSRFTOKEN',Cookies.get('csrftoken'))
             xhr.onload = () => {
                 var response = JSON.parse(xhr.response)
                 if(response == 'user created'){
@@ -72,7 +74,7 @@ export default class Registration extends Component {
                     this.errorHandle(response)
                 }
             }
-            xhr.send(JSON.stringify({username: this.state.registerUser, password: this.state.registerPass, password2: this.state.registerPass2}))
+            xhr.send(JSON.stringify({username: this.state.registerUser, password: this.state.registerPass}))
         }
     }
     login = () => {
@@ -114,6 +116,11 @@ export default class Registration extends Component {
         this.setState({
             registerPass2 : e.target.value
         })
+    }
+    enterPressed = (e,callback) => {
+        if (e.charCode == 13) {
+            callback()
+        }
     }
     tabClick = e => {
         if (e.target.innerText != this.state.view){
@@ -209,8 +216,8 @@ export default class Registration extends Component {
             },{...this.registerTabStyle})
 
             var view = <>
-                Username<span><input key='logUser' style={userInputStyle} onChange={this.loginUserHandle}/>{errorUsername}</span>
-                Password<span><input key='logPass' style={passInputStyle} onChange={this.loginPassHandle} type={'password'}/>{errorPassword}</span>
+                Username<span><input key='logUser' style={userInputStyle} onChange={this.loginUserHandle} onKeyPress={e=>this.enterPressed(e,this.login)}/>{errorUsername}</span>
+                Password<span><input key='logPass' style={passInputStyle} onChange={this.loginPassHandle}  onKeyPress={e=>this.enterPressed(e,this.login)}type={'password'}/>{errorPassword}</span>
                 <button onClick={this.login}>login</button>
             </>
         } else {
@@ -221,9 +228,9 @@ export default class Registration extends Component {
             var registerStyle = this.registerTabStyle
 
             var view =  <>
-                Username<span><input key='regUser' style={userInputStyle} onChange={this.registerUserHandle}/>{errorUsername}</span>
-                Password<span><input key='regPass' style={passInputStyle} onChange={this.registerPassHandle} type={'password'}/>{errorPassword}</span>
-                Confirm Password<span><input key='regPass2' style={pass2InputStyle} onChange={this.registerPass2Handle} type={'password'}/>{errorPassword2}</span>
+                Username<span><input key='regUser' style={userInputStyle} onChange={this.registerUserHandle} onKeyPress={e=>this.enterPressed(e,this.register)}/>{errorUsername}</span>
+                Password<span><input key='regPass' style={passInputStyle} onChange={this.registerPassHandle} onKeyPress={e=>this.enterPressed(e,this.register)} type={'password'}/>{errorPassword}</span>
+                Confirm Password<span><input key='regPass2' style={pass2InputStyle} onChange={this.registerPass2Handle} onKeyPress={e=>this.enterPressed(e,this.register)} type={'password'}/>{errorPassword2}</span>
                 <button onClick={this.register}>create</button>
             </>
         }

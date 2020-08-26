@@ -78,19 +78,21 @@ export default class ViewButton extends Component{
         borderBottomRightRadius : '10px',
         padding:'1px'
     }
-    renameStyle={
+    renameInputStyle={
         backgroundColor : 'rgba(255,255,255,0.2)', 
         border: 'none',
         borderBottom: 'solid 2px', 
         width: '100px',
         position:'absolute',
-        top:'10px',
         left:'50px'
     }
     renameButton={
         position:'absolute',
         left:'150px',
-        top:'7px'
+        marginLeft:2,
+        marginTop:-3,
+        webkitMarginBefore:-1,
+        webkitMarginEnd:20
     }
     renameContainer={
         float:'right',
@@ -134,7 +136,7 @@ export default class ViewButton extends Component{
         if (this.props.renameUI && this.props.disabled){
             var ui = (
                 <span style={this.renameContainer}>
-                    <input style={this.renameStyle}
+                    <input style={this.renameInputStyle}
                         maxLength={40}
                         onChange={e=>this.setState({value:e.target.value})} 
                         autoFocus='true'/>
@@ -188,7 +190,6 @@ export default class ViewButton extends Component{
                                 </button>
                                 <input type='color'
                                     style={{display:'none'}}
-                                    ref={this.chooseColour}
                                     onClick={e=>e.stopPropagation()}
                                     onChange={this.customColourHandle}/>
                                 <button style={{backgroundColor : this.state.customColour}}
@@ -199,7 +200,7 @@ export default class ViewButton extends Component{
                 </span>
             )
         } else if (this.props.descriptionUI){
-            var ui = <button onClick={this.props.save} style={{position:'absolute',top:'60px',right:'40px'}}>save</button>
+            var ui = <button onClick={this.props.save} style={{position:'absolute',top:5,left:-68}}>save</button>
 
         } else {
             var ui = null
@@ -208,8 +209,10 @@ export default class ViewButton extends Component{
         <div style={this.props.style}//for description button
             onMouseUp={this.props.mouseUpFix}
             onClick={e=>e.stopPropagation()}>
-            {button}
-            {ui}
+            <div>
+                {button}
+                {ui}
+            </div>
         </div>
         )
     }

@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.contrib import admin
-from django.views.generic import TemplateView
 from django.urls import path, include
 from rest_framework import routers
 from todolist import views
@@ -14,7 +13,7 @@ urlpatterns = [
     path('login/', views.Login.as_view()),
     path('logout/', views.logout),
     path('api/', include(router.urls)),  
-    path('',TemplateView.as_view(template_name='build/index.html'))
+    path('',views.Template.as_view(template_name='build/index.html'))
 ]
 """
 if settings.DEBUG:

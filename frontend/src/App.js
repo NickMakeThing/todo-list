@@ -21,6 +21,7 @@ class App extends Component {
     var xhr = new XMLHttpRequest()
     xhr.open('POST','http://localhost:8000/login/')
     xhr.setRequestHeader('content-type','application/json')
+    xhr.setRequestHeader('X-CSRFTOKEN',Cookies.get('csrftoken'))
     xhr.onload = () => {
       if (xhr.response == '"Success"') {
         localStorage.setItem('loggedIn', true)

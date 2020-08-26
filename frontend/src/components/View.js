@@ -429,9 +429,8 @@ export default class View extends Component {
     }
     inputStyle = {
         width:'235px',
+        webkitLogicalWidth : '242px',
         fontSize: '14px', 
-        maxWidth: '235px', 
-        maxHeight: '32px'
     }
     buttonsStyle = {
         marginLeft : '255px', 
@@ -441,6 +440,7 @@ export default class View extends Component {
     ghostDiv = {
         position: 'relative', 
         height : '34px', 
+        webkitLogicalHeight : '22px',
         pointerEvents : 'none', 
         marginBottom:'10px'
     }
@@ -454,21 +454,28 @@ export default class View extends Component {
         position:'sticky',
         top:0,
         left:0,
-        maxWidth:'300px',
+        width:210,
+        height : '160px',
         backgroundColor: 'rgba(255,255,255,0.5)',
         overflow:'hidden',
+        wordWrap:'break-word'
     }
     textAreaStyle = {
         color : 'rgba(0,0,0,1)',
         display : 'block',
         border : 'none',
         backgroundColor : 'rgba(0,0,0,0)',
-        resize : 'none'
+        resize : 'none',
+        outline : 'none',
+        height : 55
     }
     closeDescriptionStyle = {
+        poisition: 'absolute',
+        top:0,
+        float:'right', 
         marginTop:'-2px',
         marginRight:'3px',
-        float:'right', 
+        marginLeft:'3px',
         cursor:'pointer', 
         opacity:0.3
     }
@@ -489,10 +496,12 @@ export default class View extends Component {
             show = 'block'
         }
         if (this.state.description.task.priority){
-            var taskLabel = { backgroundColor : this.state.description.task.colour}
+            var taskLabel = { 
+                backgroundColor : this.state.description.task.colour,
+            }
         }
-        var modified = this.state.description.modified ? <span style={{color:'red'}}>(modified)</span> : null
         var descriptionStyle = Object.assign({display : show},{...this.descriptionStyle})
+        var modified = this.state.description.modified ? <span style={{color:'red'}}>(modified)</span> : null
         var tasks=[]
         for (let i in this.state.tasks){
             tasks.push(    
@@ -532,10 +541,10 @@ export default class View extends Component {
                 </span>
                 <div style={this.ghostDiv}/>
                 <span style={this.buttonsStyle}>
-                    <ViewButton_s symbol={'✍'} disabled={disabled} 
-                        func={this.taskRename} 
+                    <ViewButton_s symbol={'✔'} 
+                        func={this.taskComplete} 
                         mouseUpFix={this.mouseUpFix}
-                        renameUI={this.state.buttonUI.rename}/>    
+                        disabled={this.state.buttonUI.check}/> 
                     <ViewButton_s img={'/static/colour.png'} 
                         checkBox={this.state.checkBox}
                         editViewColour={this.props.editViewColour} 
@@ -547,26 +556,27 @@ export default class View extends Component {
                         listId={this.props.listId}
                         disabled={true}
                         colourUI={this.state.buttonUI.colour.palette}/>
-                    <ViewButton_s symbol={'✔'} 
-                        func={this.taskComplete} 
-                        mouseUpFix={this.mouseUpFix}
-                        disabled={this.state.buttonUI.check}/> 
                     <ViewButton_s img={'/static/delete.png'} l='7px' 
                         func={this.taskDelete} 
                         mouseUpFix={this.mouseUpFix}
                         disabled={this.state.buttonUI.delete}/> {/* need better trash icon */}
+                    <ViewButton_s symbol={'✎'} disabled={disabled} 
+                        func={this.taskRename} 
+                        mouseUpFix={this.mouseUpFix}
+                        renameUI={this.state.buttonUI.rename}/>    
                 </span>
                     {tasks}
-
                 <span style={this.descriptionContainer}>    
                     <div style={descriptionStyle} onClick={e=>e.stopPropagation()} onMouseUp={e=>e.stopPropagation()}>
-                        <span style={taskLabel}>
-                            {this.state.description.task.name}
-                            <span style={this.closeDescriptionStyle} 
-                                onClick={this.closeDescription}>
-                                x
-                            </span>
+                        <span style={this.closeDescriptionStyle} 
+                            onClick={this.closeDescription}>
+                            x
                         </span>
+                        <div style={{maxWidth:195}}>
+                            <span style={taskLabel}>
+                                {this.state.description.task.name}
+                            </span>
+                        </div>
                         {modified}
                         <textarea value={this.state.description.content} 
                             maxLength={250}
@@ -574,10 +584,16 @@ export default class View extends Component {
                             style={this.textAreaStyle} 
                             readOnly={this.state.buttonUI.description}
                             onChange={this.changeDescription}/>           
-                        <ViewButton_s symbol={'✍'} 
+                        <ViewButton_s symbol={'✎'} 
                             func={this.editDescription} 
                             save={this.saveNewDescription}
-                            style={{float:'right', margin:'-10px'}}
+                            style={{
+                                float:'right', 
+                                margin:'-10px', 
+                                position: 'absolute',
+                                bottom: 0,
+                                right: 0,
+                            }}
                             disabled={'true'} 
                             descriptionUI={!this.state.buttonUI.description}/>
                     </div>

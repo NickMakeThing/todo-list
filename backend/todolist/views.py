@@ -5,10 +5,13 @@ from rest_framework import viewsets
 from django.http import HttpResponse
 from rest_framework.response import Response
 from .models import Task, List
+from django.middleware.csrf import get_token
+from django.views.generic import TemplateView
 from .serializers import TaskSerializer, ListSerializer, UserSerializer, LoginSerializer, UpdateSerializer
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from django.views.decorators.csrf import csrf_protect
 
 def updateItems(updates,model):
     if(updates):
@@ -23,6 +26,7 @@ def updateItems(updates,model):
 #context manager
 #@atomic_transaction
 #@detail_route or @action for priority
+    
 class TasksView(viewsets.ModelViewSet): #authentication and permission classes
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
@@ -115,7 +119,7 @@ class ListsView(viewsets.ModelViewSet):
             if not lists.filter(id=i['id']).exists():
                 return False
         return True
- 
+
 class RegistrationView(CreateAPIView):
     serializer_class = UserSerializer
     def create(self, request, *args, **kwargs):
@@ -123,6 +127,12 @@ class RegistrationView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response('user created', status=status.HTTP_201_CREATED)
+    
+    @classmethod
+    def as_view(cls, **initkwargs):
+        view = super().as_view(**initkwargs)
+        view.csrf_exempt = False
+        return view
 
 class Login(GenericAPIView): #add validation. use serializer for validation?
     def post(self, request, *args, **kwargs):
@@ -131,9 +141,24 @@ class Login(GenericAPIView): #add validation. use serializer for validation?
         auth.login(request,serializer.validated_data)
         return Response('Success')
 
+    @classmethod
+    def as_view(cls, **initkwargs):
+        view = super().as_view(**initkwargs)
+        view.csrf_exempt = False
+        return view
+
+class Template(TemplateView):
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        response = self.render_to_response(context)
+        token = get_token(request)
+        response.set_cookie('csrftoken', token)
+        return response
+
 def logout(request):
     auth.logout(request)
     return redirect('/')
+
 
 #setting cookie works and seems its httponly attribute is set by default
 #next is to create and store session and delete it on logout
