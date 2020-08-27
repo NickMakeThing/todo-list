@@ -58,6 +58,8 @@ export default class ListView extends Component {
             var lists =  JSON.parse(JSON.stringify(this.state.lists))
             for (let i in lists){
                 if (lists[i].selected){
+                    var oldname = lists[i].name
+                    var colour = lists[i].colour
                     updates.push({id:i,listName:newname})
                     lists[i].name=newname
                     break
@@ -68,7 +70,12 @@ export default class ListView extends Component {
                     lists : lists
                 })    
             }
-            this.props.update(updates,()=>{set(lists)},'lists')
+            this.props.update(updates,()=>{
+                set(lists,oldname,newname)
+                if (this.props.deleteView(oldname,newname)){
+                    this.props.openNavTab(newname,colour,updates.id)
+                }
+            }, 'lists')
         } else {
             var buttonUI =  JSON.parse(JSON.stringify(this.state.buttonUI))
             buttonUI.rename = !buttonUI.rename
@@ -215,7 +222,7 @@ export default class ListView extends Component {
         left : '305px', 
         position : 'absolute', 
         marginTop : '10px',
-        webkitMarginBefore : -3,
+        webkitMarginBefore : -4,
         top : '130px'
     }
     render(){
@@ -225,7 +232,7 @@ export default class ListView extends Component {
         }
         var styling = {margin : '50px', width:'90%' , height:'90%'}
         var ref = 'none'
-        if (this.props.activeView != this.props.className) {
+        if (this.props.activeView != this.props.viewName) {
             styling.display = 'none'
         } else {
             ref=this.props.reference
@@ -245,14 +252,13 @@ export default class ListView extends Component {
         return (
             <div style={styling}  ref = {ref}
                 onClick={this.closeOptions}
-                className={this.props.className}>
+                viewName={this.props.viewName}>
                 <input style={this.inputStyle} maxLength={25} onChange={this.inputHandle} value={this.state.input}/><button onClick={this.listCreate}>create</button>
                 {buttons}
                 <span style={this.buttonsStyle}>
                     <ViewButton_s img={'/static/colour.png'} 
                         listView={true}
                         checkBox={this.state.checkBox}
-                        className={this.props.className}
                         func={this.colourPalette}
                         update={this.listColour}
                         disabled={this.state.buttonUI.colour.colour} 

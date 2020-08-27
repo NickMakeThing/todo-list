@@ -139,7 +139,7 @@ export default class View extends Component {
         })
     }
     setMouse = e => {
-        if(this.props.activeView == this.props.className && this.state.dragging){
+        if(this.props.activeView == this.props.viewName && this.state.dragging){
             this.setState({
                 mouse : {x : e.clientX, y : e.clientY}
             },()=>{
@@ -400,7 +400,7 @@ export default class View extends Component {
         })
     }
     componentDidUpdate(){
-        if (this.props.activeView == this.props.className && !this.state.tasksLoaded) {
+        if (this.props.activeView == this.props.viewName && !this.state.tasksLoaded) {
             let xhr = new XMLHttpRequest()
             xhr.open('GET','http://localhost:8000/api/tasks/'+this.props.listId)
             xhr.setRequestHeader('content-type','application/json')
@@ -486,7 +486,7 @@ export default class View extends Component {
         }
         var styling = {margin : '50px', width: '90%', height:'90%'}
         var ref = 'none'
-        if (this.props.activeView != this.props.className) {
+        if (this.props.activeView != this.props.viewName) {
             styling.display = 'none'
         } else {
             ref=this.props.reference
@@ -529,8 +529,7 @@ export default class View extends Component {
             <div style={styling} ref={ref}
                 onMouseMove={this.setMouse} 
                 onClick={e=>e.stopPropagation()}
-                onMouseUp={this.drop} 
-                className={this.props.className}>
+                onMouseUp={this.drop} >
                 <span style={{position : 'absolute'}}> 
                     <input key="taskCreationInput" 
                         maxLength={40}
@@ -548,7 +547,6 @@ export default class View extends Component {
                     <ViewButton_s img={'/static/colour.png'} 
                         checkBox={this.state.checkBox}
                         editViewColour={this.props.editViewColour} 
-                        className={this.props.className}
                         func={this.colourPalette} 
                         mouseUpFix={this.mouseUpFix}
                         update={this.taskColour} 

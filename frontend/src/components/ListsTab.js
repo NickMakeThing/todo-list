@@ -30,11 +30,11 @@ export default class ListsTab extends Component {
     
     render() {
         return <div ref={this.tab}
-            className='Lists'
+            viewName='Lists'
             style={this.styling}
             onMouseOver={this.hover}
-            onMouseLeave={this.hoverLeave}
-            onClick={(e)=>this.props.changeView(e.target.className,e.target.style.backgroundColor)}>
+            onMouseLeave={this.hoverLeave} 
+            onClick={(e)=>this.props.changeView(this.props.viewName,e.target.style.backgroundColor)}>
             Lists
         </div>
     };

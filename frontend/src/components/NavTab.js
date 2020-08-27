@@ -34,23 +34,22 @@ export default class NavTab extends Component {
             textAlign: 'center',
             fontSize: '110%',
         }
-        if (this.props.activeView != this.props.className) {
+        if (this.props.activeView != this.props.viewName) {
             styling.filter = 'brightness(95%)' 
         }
-        if (this.props.className.length > 7){
-            var text = this.props.className.slice(0,5)+'...'
+        if (this.props.viewName.length > 7){
+            var text = this.props.viewName.slice(0,5)+'...'
         } else {
-            var text = this.props.className
+            var text = this.props.viewName
         }
 
         return <div ref={this.tab}
-        key={this.props.className+'tab'}
-        className={this.props.className}
-        style={styling}
-        onClick={(e)=>this.props.changeView(e.target.className,e.target.style.backgroundColor)}>
+        key={this.props.viewName+'tab'}
+        style={styling}                             ////v--- this
+        onClick={(e)=>this.props.changeView(this.props.viewName,e.target.style.backgroundColor)}>
             <span 
             style={this.xstyle}
-            onClick={this.props.closeNavTab}
+            onClick={e=>this.props.closeNavTab(e,null,this.props.viewName)}
             >x</span>
             {text}
         </div>

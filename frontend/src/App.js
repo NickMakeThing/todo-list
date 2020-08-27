@@ -17,6 +17,17 @@ class App extends Component {
       func : null,
     }
   }
+  deleteView = (oldname) => {
+    var views = JSON.parse(JSON.stringify(this.state.views))
+    if (this.state.views[oldname]){ //using var declared above causes crash here
+      open=true
+    }
+    delete views[oldname]
+    this.setState({
+      views : views
+    })
+    return open
+  }
   login = (username,password,callback) => {
     var xhr = new XMLHttpRequest()
     xhr.open('POST','http://localhost:8000/login/')
@@ -53,7 +64,6 @@ class App extends Component {
   }
 
   changeView = (name, colourCode) => {
-    //this worked for some reason -> this.state.activeView = e.target.id
     this.setState({
       activeView : name,
       colour : colourCode
@@ -88,10 +98,10 @@ class App extends Component {
     })
   }
 
-  closeNavTab = (e,list) => {
+  closeNavTab = (e,list,tabname) => {
     if(e){
       e.stopPropagation()
-      var name = e.target.parentNode.className
+      var name = tabname
     } else {
       var name=list
     }
@@ -142,7 +152,7 @@ class App extends Component {
       var views=[]
       for (let i in this.state.views){
         views.push(
-        <View className={i} 
+        <View viewName={i} 
           key={i}
           reference={this.activeViewContainer}
           listId={this.state.views[i].listId}
@@ -158,7 +168,8 @@ class App extends Component {
     
         <div style={{minHeight:'90%'}} id='views'
           onClick={()=>this.failSafe(this.activeViewContainer)}>
-          <ListView className='Lists'
+          <ListView viewName='Lists'
+            deleteView={this.deleteView}
             reference={this.activeViewContainer}
             update={this.update}
             closeNavTab={this.closeNavTab}

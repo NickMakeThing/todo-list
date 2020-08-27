@@ -37,7 +37,6 @@ export default class NavBar extends Component {
         window.addEventListener("resize", null);
     }
     componentWillUpdate(nextProps){
-        //this is so tabs will be displayed in the order that they are opened
         var next = Object.keys(nextProps.views).length
         var thisprops = Object.keys(this.props.views).length
         var views = [...this.state.views]
@@ -124,7 +123,7 @@ export default class NavBar extends Component {
                 <NavTab closeNavTab={this.props.closeNavTab} 
                     size={size}
                     tabPosMod={this.state.tabPosMod}
-                    className={i} 
+                    viewName={i} 
                     passRect={func}
                     colourCode={this.props.views[i].colourCode}
                     changeView={this.props.changeView}
@@ -138,6 +137,7 @@ export default class NavBar extends Component {
                 {scrollLeft}
                 <span style={{marginLeft:this.state.tabPosMod}}>
                     <ListsTab changeColour={this.props.changeColour}
+                        viewName={'Lists'} 
                         changeView={this.props.changeView}
                         tabPosMod={this.state.tabPosMod}
                         passRect={func}/>
