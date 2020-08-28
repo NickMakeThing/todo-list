@@ -270,7 +270,7 @@ export default class View extends Component {
             priorityUpdate.push({id:i,priority:updated.priority[i]})
         }
         var xhr = new XMLHttpRequest()
-        xhr.open('DELETE','http://localhost:8000/api/tasks/'+this.props.listId+'/')
+        xhr.open('DELETE','/api/tasks/'+this.props.listId+'/')
         xhr.setRequestHeader('content-type','application/json')
         xhr.setRequestHeader('X-CSRFTOKEN',Cookies.get('csrftoken'))
         xhr.onload = () => {
@@ -290,7 +290,7 @@ export default class View extends Component {
             if (i.name==this.state.input) {return}
         }
         var xhr = new XMLHttpRequest()
-        xhr.open('POST','http://localhost:8000/api/tasks/'+this.props.listId+'/')
+        xhr.open('POST','/api/tasks/'+this.props.listId+'/')
         xhr.setRequestHeader('content-type','application/json')
         xhr.setRequestHeader('X-CSRFTOKEN',Cookies.get('csrftoken'))
         xhr.onload = () => {
@@ -402,7 +402,7 @@ export default class View extends Component {
     componentDidUpdate(){
         if (this.props.activeView == this.props.viewName && !this.state.tasksLoaded) {
             let xhr = new XMLHttpRequest()
-            xhr.open('GET','http://localhost:8000/api/tasks/'+this.props.listId)
+            xhr.open('GET','/api/tasks/'+this.props.listId)
             xhr.setRequestHeader('content-type','application/json')
             xhr.responseType = 'json'
             xhr.onload = () => {

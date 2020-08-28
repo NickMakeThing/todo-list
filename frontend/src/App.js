@@ -20,7 +20,7 @@ class App extends Component {
   deleteView = (oldname) => {
     var views = JSON.parse(JSON.stringify(this.state.views))
     if (this.state.views[oldname]){ //using var declared above causes crash here
-      open=true
+      var open=true
     }
     delete views[oldname]
     this.setState({
@@ -30,7 +30,7 @@ class App extends Component {
   }
   login = (username,password,callback) => {
     var xhr = new XMLHttpRequest()
-    xhr.open('POST','http://localhost:8000/login/')
+    xhr.open('POST','/login/')
     xhr.setRequestHeader('content-type','application/json')
     xhr.setRequestHeader('X-CSRFTOKEN',Cookies.get('csrftoken'))
     xhr.onload = () => {
@@ -122,7 +122,7 @@ class App extends Component {
   }
   update = (update,callback,path) => {
     var xhr = new XMLHttpRequest()
-    xhr.open('PATCH','http://localhost:8000/api/'+path+'/')
+    xhr.open('PATCH','/api/'+path+'/')
     xhr.setRequestHeader('content-type','application/json')
     xhr.setRequestHeader('X-CSRFTOKEN',Cookies.get('csrftoken'))
     xhr.onload = () => { 
@@ -148,7 +148,7 @@ class App extends Component {
     if (this.state.loggedIn){
       var logout = <a style={{color:'black'}}
         onClick = {()=>localStorage.setItem('loggedIn', false)}
-        href='http://localhost:8000/logout'>logout</a>
+        href='/logout'>logout</a>
       var views=[]
       for (let i in this.state.views){
         views.push(

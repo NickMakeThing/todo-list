@@ -90,7 +90,7 @@ export default class ListView extends Component {
         }
         //if (!this.state.lists(list => list.name == value) && /\S/.test(value))
             var xhr = new XMLHttpRequest()
-            xhr.open('POST','http://localhost:8000/api/lists/')
+            xhr.open('POST','/api/lists/')
             xhr.setRequestHeader('content-type','application/json')
             xhr.setRequestHeader('X-CSRFTOKEN',Cookies.get('csrftoken'))
             xhr.onload = () => {
@@ -122,7 +122,7 @@ export default class ListView extends Component {
         var count = this.state.checkBox-listIds.length
         var state = this.selectListCheck(buttonUI,count)
         var xhr = new XMLHttpRequest()
-        xhr.open('DELETE','http://localhost:8000/api/lists/')
+        xhr.open('DELETE','/api/lists/')
         xhr.setRequestHeader('content-type','application/json')
         xhr.setRequestHeader('X-CSRFTOKEN',Cookies.get('csrftoken'))
         xhr.onload = () => {
@@ -181,7 +181,7 @@ export default class ListView extends Component {
     componentDidMount(){
         if (!this.state.listsLoaded) {
             let xhr = new XMLHttpRequest()
-            xhr.open('GET','http://localhost:8000/api/lists/')
+            xhr.open('GET','/api/lists/')
             xhr.setRequestHeader('content-type','application/json')
             xhr.responseType = 'json'
             xhr.onload = () => {
