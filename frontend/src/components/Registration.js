@@ -63,7 +63,7 @@ export default class Registration extends Component {
     register = e => {
         if(this.frontEndRegisterCheck()){
             var xhr = new XMLHttpRequest()
-            xhr.open('POST','http://localhost:8000/register/')
+            xhr.open('POST','/register/')
             xhr.setRequestHeader('content-type','application/json')
             xhr.setRequestHeader('X-CSRFTOKEN',Cookies.get('csrftoken'))
             xhr.onload = () => {
