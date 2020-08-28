@@ -84,7 +84,8 @@ export default class ViewButton extends Component{
         borderBottom: 'solid 2px', 
         width: '100px',
         position:'absolute',
-        left:'50px'
+        left:'50px',
+        outline : 'none'
     }
     renameButton={
         position:'absolute',
