@@ -2,9 +2,11 @@
 This is my first website. It works and does what I want it to do, but the code could be more readable and structured better. My next project will be more readable and have better structure by design.
 
 ## About
-Nickscoolproject.com is a to-do list website where users login to create, organize and keep multiple to-do lists online. Users can drag and drop tasks of a list to re-order them. The order of tasks in each list is saved on the back-end. Users may change multiple tasks or lists at the same time. This action also updates the backend and makes use of djangos 'bulk_update' feature. The website features a nav bar which contains tabs for each list, which can be opened and closed, similar a user would navigate between multiple pages in a web browser.
+Nickscoolproject.com is a to-do list website where users login to create, organize and keep multiple to-do lists online. Users can drag and drop tasks of a list to re-order them. The order of tasks in each list is saved on the back-end. Users may change multiple tasks or lists at the same time. This action also updates the backend and makes use of djangos 'bulk_update' feature. The website features a nav bar which contains tabs for each list, which can be opened and closed, similar to tabs in a web browser.
 
 https://www.nickscoolproject.com
+
+![screenshot](./readme_image2.png "nickscoolproject")
 
 ## To Run Locally
 This website uses python 3 and the django framework for the backend. 
