@@ -55,24 +55,24 @@ Inside the root folder are /backend/ and /frontend/ directories. Django python c
 ```
 frontend
 ├── src
-│   ├── App.js                      main react file, logic for which view to show
+│   ├── App.js                  main react file, logic for which view to show
 │   ├── App.test.js                 
-│   ├── components                  folder containing all react components
-│   │   ├── CheckBox.js             custom checkbox 
-│   │   ├── ListButtons.js          clickable rectangle, which opens a NavTab
-│   │   ├── ListsTab.js             special NavTab that takes user to the ListView
-│   │   ├── ListView.js             main view, which displays todo-lists as ListButtons
-│   │   ├── NavBar.js               contains ListTabs at the top of the page
-│   │   ├── NavTab.js               like a browser tab. takes the user to individual todo-list
-│   │   ├── Registration.js         login and registration view
-│   │   ├── TaskButton.js           black '?' button on tasks used to open descriptions
-│   │   ├── Task.js                 individual entries contained in todo-lists
-│   │   ├── ViewButton(sidebar).js  user actions: delete, rename, re-colour, complete
-│   │   └── View.js                 view for individual lists. displays its tasks
+│   ├── components              folder containing all react components
+│   │   ├── CheckBox.js         custom checkbox 
+│   │   ├── ListButtons.js      clickable rectangle, which opens a NavTab
+│   │   ├── ListsTab.js         special NavTab that takes user to the ListView
+│   │   ├── ListView.js         main view, which displays todo-lists as ListButtons
+│   │   ├── NavBar.js           contains ListTabs at the top of the page
+│   │   ├── NavTab.js           like a browser tab. takes the user to individual todo-list
+│   │   ├── Registration.js     login and registration view
+│   │   ├── TaskButton.js       black '?' button on tasks used to open descriptions
+│   │   ├── Task.js             individual entries contained in todo-lists
+│   │   ├── ViewButton.js       user actions: delete, rename, re-colour, complete
+│   │   └── View.js             view for individual lists. displays its tasks
 │   ...
-├── public                          contains static files
+├── public                      contains static files
 ├── node_modules                    
-├── build.sh                        compiles code and moves it to the correct backend folder 
+├── build.sh                    compiles code and moves it to the correct backend folder 
 ├── package.json                    
 └── package-lock.js                 
 
@@ -80,17 +80,17 @@ backend
 ├── backend                         
 │   ├── asgi.py                     
 │   ├── __init__.py         		
-│   ├── settings.py                 django settings: selecting middleware, DB connection, etc
-│   ├── urls.py                     url routing
-│   └── wsgi.py                     http requests to python object, vice versa
-├── manage.py                       django console/shell commands
-└── todolist                        application code               
+│   ├── settings.py             django settings: selecting middleware, DB connection, etc
+│   ├── urls.py                 url routing
+│   └── wsgi.py                 http requests to python object, vice versa
+├── manage.py                   django console/shell commands
+└── todolist                    application code               
     ├── apps.py                     
     ├── __init__.py                
     ├── migrations                  
-    ├── models.py                   defines database tables
-    ├── serializers.py              validation checking
+    ├── models.py               defines database tables
+    ├── serializers.py          validation checking
     ├── templates                   
-    │   └── build                   contains compiled react code             
-    └── views.py                    logic that handles all requests
+    │   └── build               contains compiled react code             
+    └── views.py                logic that handles all requests
 ```
