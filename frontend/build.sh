@@ -1,5 +1,7 @@
-rm -r "/home/nick/Desktop/new project/backend/todolist/templates/build"
+#!/bin/bash
+
+rm -r "../backend/todolist/templates/build"
 npm run build
-mv build "/home/nick/Desktop/new project/backend/todolist/templates/build"
-mv "/home/nick/Desktop/new project/backend/todolist/templates/build/colour.png" "/home/nick/Desktop/new project/backend/todolist/templates/build/static/colour.png"
-mv "/home/nick/Desktop/new project/backend/todolist/templates/build/delete.png" "/home/nick/Desktop/new project/backend/todolist/templates/build/static/delete.png"
+mv build "../backend/todolist/templates/build"
+mv "../backend/todolist/templates/build/colour.png" "../backend/todolist/templates/build/static/colour.png"
+mv "../backend/todolist/templates/build/delete.png" "../backend/todolist/templates/build/static/delete.png"
