@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import Task from './Task'
-import ViewButton_s from './ViewButton(sidebar)'
+import ViewButton_s from './ViewButton'
 import Cookies from 'js-cookie'
 
 export default class View extends Component {

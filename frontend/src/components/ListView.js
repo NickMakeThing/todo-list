@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import ListButtons from './ListButtons'
-import ViewButton_s from './ViewButton(sidebar)'
+import ViewButton_s from './ViewButton'
 import Cookies from 'js-cookie'
 export default class ListView extends Component {
     constructor(props){
