@@ -6,7 +6,7 @@ Nickscoolproject.com is a to-do list website where users login to create, organi
 
 https://www.nickscoolproject.com
 
-![screenshot](./readme_image2.png "nickscoolproject")
+![screenshot](./readme_image.png "nickscoolproject")
 
 ## To Run Locally
 This website uses python 3 and the django framework for the backend. 
