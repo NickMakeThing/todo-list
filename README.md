@@ -1,21 +1,17 @@
-# nickscoolproject
-This is my first website. It works and does what I want it to do, but the code could be more readable and structured better. My next project will be more readable and have better structure by design.
-
-## About
-Nickscoolproject.com is a to-do list website where users login to create, organize and keep multiple to-do lists online. Users can drag and drop tasks of a list to re-order them. The order of tasks in each list is saved on the back-end. Users may change multiple tasks or lists at the same time. This action also updates the backend and makes use of djangos 'bulk_update' feature. The website features a nav bar which contains tabs for each list, which can be opened and closed, similar to tabs in a web browser.
+# Todo List App
+This is a web app where users login to create, organize and keep multiple to-do lists online. Users can drag and drop tasks of a list to re-order them. The order of tasks in each list is saved on the back-end. Users may change multiple tasks or lists at the same time. The website features a nav bar which contains tabs for each list, which can be opened and closed, similar to tabs in a web browser.
 
 https://www.nickscoolproject.com
 
 ![screenshot](./readme_image.png "nickscoolproject")
 
+## Code Quality
+This is my first website using Django and React. I am happy with the functionality, but the code could be more readable and structured better. I have learned a lot from building this project and I will design my next project to be more readable and have a better structure.
+
 ## To Run Locally
-This website uses python 3 and the django framework for the backend. 
-To begin you should install python 3 and pip3.
-```bash
-sudo apt-get install python3
-sudo apt-get install python3-pip
-```
-Then you should install a virtualenv to install the required python dependencies in.
+This website uses python 3 and the django framework for the backend. More specifically, python 3.8 was used during development.
+
+Begin by installing a virtualenv to install the required python dependencies in.
 You can use either one of these commands
 ```bash
 sudo apt-get install python3-virtualenv
@@ -24,34 +20,16 @@ or
 ```bash
 pip3 install virtualenv
 ```
-Then enter the root directory of the project folder, which is named 'todo-list'
+Then run the following commands
 ```bash
-cd todo-list
+virtualenv env                      #Create the virtual environment
+. env/bin/activate                  #Begin using the virtual environment
+pip3 install -r requirements.txt    #Install python libraries inside the virtual environment
 ```
-create the virtual environment by entering
-```bash
-virtualenv env
-```
-To begin using the virtual environment, enter
-```bash
-. env/bin/activate
-```
-or
-```bash
-source env/bin/activate
-```
-If everything has worked so far, then from here you should install the python libraries .
-used in this project by entering:
-```bash
-pip3 install -r requirements.txt
-```
-Not everything in this text file is necassery, but may be of use. eg: django-corsheaders, which
-enables you to send ajax requests without being on the website. This can be of convenience for testing.
 
 From here you may go the backend directory to set up the database and run the server.
 ```bash
 cd /backend
-python3 manage.py makemigrations
 python3 manage.py migrate
 python3 manage.py runserver
 ```
@@ -62,7 +40,7 @@ Frontend code is maintained in the /frontend/src/ directory using react. If you 
 
 I have created a script to automate the building process called build.sh in the /frontend/src/ directory. It deletes the build currently in the backend folder, then creates a new one, which is then placed in the backend to replace the old one. It also moves static files in places they need to be.
 
-But before you use this script, you must install node and npm. You should download and install npm from [here](https://nodejs.org/en/download/) instead of using the apt package manager because it often installs very old versions. 
+But before you use this script, you must install node and npm. You should download and install npm from [here](https://nodejs.org/en/download/) instead of using the apt package manager because it often installs very old versions. Node version 14.5 and npm version 6.15.5 were used in this project.
 
 After installing node and npm, you should be able to use the build script in the /frontend/ directory by entering:
 ```bash
@@ -100,21 +78,19 @@ frontend
 
 backend
 ├── backend                         
-│   ├── asgi.py                     not used in this project
+│   ├── asgi.py                     
 │   ├── __init__.py         		
 │   ├── settings.py                 django settings: selecting middleware, DB connection, etc
 │   ├── urls.py                     url routing
 │   └── wsgi.py                     http requests to python object, vice versa
 ├── manage.py                       django console/shell commands
-└── todolist                        application code
-    ├── admin.py                    
+└── todolist                        application code               
     ├── apps.py                     
     ├── __init__.py                
     ├── migrations                  
-    ├── models.py                   
+    ├── models.py                   defines database tables
     ├── serializers.py              validation checking
     ├── templates                   
-    │   └── build                   contains compiled react code
-    ├── tests.py                    
+    │   └── build                   contains compiled react code             
     └── views.py                    logic that handles all requests
 ```
