@@ -1,5 +1,5 @@
 # Todo List App
-Nickscoolproject.com is a to-do list website where users login to create, organize and keep multiple to-do lists online. Users can drag and drop tasks of a list to re-order them. The order of tasks in each list is saved on the back-end. Users may change multiple tasks or lists at the same time. The website features a nav bar which contains tabs for each list, which can be opened and closed, similar to tabs in a web browser.
+This is a web app where users login to create, organize and keep multiple to-do lists online. Users can drag and drop tasks of a list to re-order them. The order of tasks in each list is saved on the back-end. Users may change multiple tasks or lists at the same time. The website features a nav bar which contains tabs for each list, which can be opened and closed, similar to tabs in a web browser.
 
 https://www.nickscoolproject.com
 
