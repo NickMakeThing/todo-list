@@ -42,8 +42,10 @@ I have created a script to automate the building process called build.sh in the 
 
 But before you use this script, you must install node and npm. You should download and install npm from [here](https://nodejs.org/en/download/) instead of using the apt package manager because it often installs very old versions. Node version 14.5 and npm version 6.15.5 were used in this project.
 
-After installing node and npm, you should be able to use the build script in the /frontend/ directory by entering:
+After installing node and npm, run `npm install` to install javascript depndencies required to run the build command.
 ```bash
+cd frontend
+npm install
 ./build.sh
 ```
 ## Structure
