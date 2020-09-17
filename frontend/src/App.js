@@ -42,7 +42,6 @@ class App extends Component {
       } else {
         callback(JSON.parse(xhr.response))
       } 
-      //setstate loggedin true, user {id and name?}
     }
     xhr.send(JSON.stringify({username: username, password: password}))
   }
@@ -193,9 +192,5 @@ class App extends Component {
 }
 
 export default App;
-    //https://htmlcolorcodes.com/
-    //https://scriptverse.academy/tutorials/reactjs-update-array-state.html
-    //https://stackoverflow.com/questions/37435334/correct-way-to-push-into-state-array
-    //https://www.iconarchive.com
 
 
