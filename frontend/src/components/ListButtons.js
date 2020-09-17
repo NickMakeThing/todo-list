@@ -5,8 +5,6 @@ export default class ListButtons extends Component {
     constructor(props) {
         super(props)
     }
-//animation when tab is created to show where it is
-//queue animation: when oppened or is already opened, 
 
     styling = {
         cursor : 'pointer',
@@ -35,6 +33,6 @@ export default class ListButtons extends Component {
                     check={check}/>
                 <span style={{lineHeight : '50px', pointerEvents : 'none'}}>{this.props.name}</span>
             </div>
-        )//priority={this.props.priority}
+        )
     }
 }
