@@ -35,8 +35,6 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 class LoginSerializer(serializers.Serializer):
-    #right/read only in serializer?
-    #commenting these two lines out results in "username does not exist"
     password = serializers.CharField(max_length=128, write_only=True)
     username = serializers.CharField(max_length=128, write_only=True)
     def validate(self, data):
@@ -52,10 +50,3 @@ class LoginSerializer(serializers.Serializer):
             )
         return username
     
-"""
-    xhr = new XMLHttpRequest()
-    xhr.open('POST','http://localhost:8000/test/')
-    xhr.setRequestHeader('content-type','application/json')
-    xhr.onload = () => {console.log('loaded: ',xhr.response, xhr.status)}
-    xhr.send()
-"""
